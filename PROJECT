@@ -1,0 +1,7 @@
+domain: kloops.io
+repo: github.com/eddycharly/kloops
+resources:
+- group: config
+  kind: RepoConfig
+  version: v1alpha1
+version: "2"
