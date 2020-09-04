@@ -16,7 +16,7 @@ import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/dco"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/dog"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/golint"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/goose"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/goose"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/heart"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/help"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/hold"

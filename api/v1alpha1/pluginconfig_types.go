@@ -25,12 +25,19 @@ type PluginConfigSpec struct {
 	// Owners contains configuration related to handling OWNERS files.
 	Owners Owners `json:"owners,omitempty"`
 	// Built-in plugins specific configuration.
-	Cat Cat `json:"cat,omitempty"`
+	Cat   Cat   `json:"cat,omitempty"`
+	Goose Goose `json:"goose,omitempty"`
 }
 
 // Cat contains the configuration for the cat plugin.
 type Cat struct {
 	// Key is the api key for thecatapi.com
+	Key Secret `json:"key"`
+}
+
+// Goose contains the configuration for the goose plugin.
+type Goose struct {
+	// Key is the api key for unsplash.com
 	Key Secret `json:"key"`
 }
 

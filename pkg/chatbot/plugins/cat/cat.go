@@ -66,11 +66,10 @@ type clowder interface {
 }
 
 type realClowder struct {
-	url     string
-	lock    sync.RWMutex
-	update  time.Time
-	key     string
-	keyPath string
+	url    string
+	lock   sync.RWMutex
+	update time.Time
+	key    string
 }
 
 func (c *realClowder) setKey(client client.Client, namespace string, secret v1alpha1.Secret) {
