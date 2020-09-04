@@ -31,7 +31,7 @@ import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/milestonestatus"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/override"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/owners-label"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/pony"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/pony"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/project"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/projectmanager"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/releasenote"
