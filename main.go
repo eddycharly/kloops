@@ -20,15 +20,15 @@ import (
 	"flag"
 	"os"
 
+	configv1alpha1 "github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/controllers"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/pluginimports"
+	"github.com/eddycharly/kloops/pkg/chatbot/server"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	configv1alpha1 "github.com/eddycharly/kloops/api/v1alpha1"
-	"github.com/eddycharly/kloops/controllers"
-	"github.com/eddycharly/kloops/pkg/chatbot"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -75,8 +75,10 @@ func main() {
 	// +kubebuilder:scaffold:builder
 	stopCh := ctrl.SetupSignalHandler()
 
+	server := server.NewServer(mgr.GetClient(), ctrl.Log)
+
 	go func() {
-		if err := chatbot.Start(mgr.GetClient()); err != nil {
+		if err := server.Start("", 8090); err != nil {
 			setupLog.Error(err, "problem starting chatbot")
 			os.Exit(1)
 		}

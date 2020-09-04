@@ -26,3 +26,5 @@ bin
 config
 tempo
 
+
+.DS_Store

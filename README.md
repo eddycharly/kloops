@@ -10,4 +10,5 @@
 
 ### RepoConfig
 
+`kubebuilder create api --group config --version v1alpha1 --kind PluginConfig`
 `kubebuilder create api --group config --version v1alpha1 --kind RepoConfig`

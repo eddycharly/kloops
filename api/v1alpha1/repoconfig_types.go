@@ -20,21 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// PullRequestMergeType inidicates the type of the pull request
-type PullRequestMergeType string
-
-// Possible types of merges for the GitHub merge API
-const (
-	MergeMerge  PullRequestMergeType = "merge"
-	MergeRebase PullRequestMergeType = "rebase"
-	MergeSquash PullRequestMergeType = "squash"
-)
-
-// IsValid checks that the merge type is valid
-func (c PullRequestMergeType) IsValid() bool {
-	return c == MergeMerge || c == MergeRebase || c == MergeSquash
-}
-
 // AutoMerge defines auto merge configuration
 type AutoMerge struct {
 	// BatchSizeLimitMap is the batch size limit as the value.
@@ -62,11 +47,16 @@ type GitHubRepo struct {
 	// ServerURL is the GitHub server url
 	ServerURL string `json:"server,omitempty"`
 	// HmacToken is the secret used to validate webhooks
-	// TODO should be really a secret
-	HmacToken string `json:"hmacToken"`
+	HmacToken Secret `json:"hmacToken"`
 	// Token is the token used to interact with the git repository
-	// TODO should be really a secret
-	Token string `json:"token"`
+	Token Secret `json:"token"`
+}
+
+// RepoPluginConfig defines a PluginConfig (it can be a ref or an inline spec)
+type RepoPluginConfig struct {
+	Ref     string            `json:"ref,omitempty"`
+	Spec    *PluginConfigSpec `json:"spec,omitempty"`
+	Plugins []string          `json:"plugins,omitempty"`
 }
 
 // RepoConfigSpec defines the desired state of RepoConfig
@@ -75,6 +65,8 @@ type RepoConfigSpec struct {
 	GitHub *GitHubRepo `json:"gitHub,omitempty"`
 	// AutoMerge configuration for the repository
 	AutoMerge *AutoMerge `json:"autoMerge,omitempty"`
+	// PluginConfig defines the plugin configuration for the repository
+	PluginConfig RepoPluginConfig `json:"pluginConfig"`
 }
 
 // RepoConfigStatus defines the observed state of RepoConfig
@@ -82,11 +74,8 @@ type RepoConfigStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:printcolumn:name=owner,JSONPath=.spec.owner,type=string
-// +kubebuilder:printcolumn:name=repo,JSONPath=.spec.repo,type=string
 // +kubebuilder:printcolumn:name=age,JSONPath=.metadata.creationTimestamp,type=date
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:shortName=rc
 
 // RepoConfig is the Schema for the repoconfigs API
 type RepoConfig struct {
