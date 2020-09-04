@@ -49,5 +49,5 @@ import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/verify-owners"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/welcome"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/wip"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/yuks"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/yuks"
 )
