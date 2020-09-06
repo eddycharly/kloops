@@ -70,7 +70,8 @@ func (e *events) makePluginRequest(repoConfig *v1alpha1.RepoConfig, pluginConfig
 		logger:       e.logger.WithName(loggerName),
 		namespace:    repoConfig.Namespace,
 		scmClient: &pluginScmClient{
-			client: scmClient,
+			client:  scmClient,
+			botName: repoConfig.Spec.BotName,
 		},
 	}
 }

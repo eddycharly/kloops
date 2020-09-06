@@ -61,6 +61,8 @@ type RepoPluginConfig struct {
 
 // RepoConfigSpec defines the desired state of RepoConfig
 type RepoConfigSpec struct {
+	// BotName is the bot name used by plugins
+	BotName string `json:"botName,omitempty"`
 	// GitHub defines the GitHub repository details
 	GitHub *GitHubRepo `json:"gitHub,omitempty"`
 	// AutoMerge configuration for the repository

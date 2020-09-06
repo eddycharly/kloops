@@ -42,9 +42,9 @@ var (
 	pluginHelp                 = map[string]HelpProvider{}
 	issueCommentHandlers       = map[string]IssueCommentHandler{}
 	pullRequestCommentHandlers = map[string]PullRequestCommentHandler{}
+	pullRequestHandlers        = map[string]PullRequestHandler{}
 	// genericCommentHandlers = map[string]GenericCommentHandler{}
 	// 	issueHandlers              = map[string]IssueHandler{}
-// 	pullRequestHandlers        = map[string]PullRequestHandler{}
 // 	pushEventHandlers          = map[string]PushEventHandler{}
 // 	reviewEventHandlers        = map[string]ReviewEventHandler{}
 // 	reviewCommentEventHandlers = map[string]ReviewCommentEventHandler{}
@@ -52,9 +52,16 @@ var (
 )
 
 type PluginScmClient interface {
+	BotName() string
 	GetClient() *scm.Client
 	CreateComment(owner, repo string, number int, pr bool, comment string) error
+	EditComment(owner, repo string, number int, pr bool, commentID int, comment string) error
+	DeleteComment(owner, repo string, number int, pr bool, commentID int) error
 	QuoteAuthorForComment(string) string
+	ListPullRequestComments(owner, repo string, number int) ([]*scm.Comment, error)
+	GetIssueLabels(string, string, int, bool) ([]*scm.Label, error)
+	AddLabel(string, string, int, string, bool) error
+	RemoveLabel(string, string, int, string, bool) error
 }
 
 type PluginRequest interface {
@@ -116,14 +123,13 @@ func GetPullRequestCommentHandler(plugin string) PullRequestCommentHandler {
 	return pullRequestCommentHandlers[plugin]
 }
 
-// // PullRequestHandler defines the function contract for a scm.PullRequest handler.
-// type PullRequestHandler func(Agent, scm.PullRequestHook) error
+// PullRequestHandler defines the function contract for a scm.PullRequest handler.
+type PullRequestHandler func(PluginRequest, *scm.PullRequestHook) error
 
-// // RegisterPullRequestHandler registers a plugin's scm.PullRequest handler.
-// func RegisterPullRequestHandler(name string, fn PullRequestHandler, help HelpProvider) {
-// 	pluginHelp[name] = help
-// 	pullRequestHandlers[name] = fn
-// }
+// RegisterPullRequestHandler registers a plugin's scm.PullRequest handler.
+func RegisterPullRequestHandler(name string, fn PullRequestHandler) {
+	pullRequestHandlers[name] = fn
+}
 
 // // StatusEventHandler defines the function contract for a scm.Status handler.
 // type StatusEventHandler func(Agent, scm.Status) error
