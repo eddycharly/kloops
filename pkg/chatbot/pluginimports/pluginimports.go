@@ -38,7 +38,7 @@ import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/require-matching-label"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/requiresig"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/retitle"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/shrug"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/shrug"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/sigmention"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/size"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/skip"
