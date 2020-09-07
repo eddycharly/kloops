@@ -216,3 +216,39 @@ func (c *pluginScmClient) ListPullRequestComments(owner, repo string, number int
 	}
 	return allComments, nil
 }
+
+// GetFile retruns the file from GitHub
+func (c *pluginScmClient) GetFile(owner, repo, filepath, commit string) ([]byte, error) {
+	ctx := context.Background()
+	fullName := c.repositoryName(owner, repo)
+	answer, _, err := c.client.Contents.Find(ctx, fullName, filepath, commit)
+	var data []byte
+	if answer != nil {
+		data = answer.Data
+	}
+	return data, err
+}
+
+// GetPullRequestChanges returns the changes in a pull request
+func (c *pluginScmClient) GetPullRequestChanges(org, repo string, number int) ([]*scm.Change, error) {
+	ctx := context.Background()
+	fullName := c.repositoryName(org, repo)
+	var allChanges []*scm.Change
+	var resp *scm.Response
+	var changes []*scm.Change
+	var err error
+	firstRun := false
+	opts := scm.ListOptions{
+		Page: 1,
+	}
+	for !firstRun || (resp != nil && opts.Page <= resp.Page.Last) {
+		changes, resp, err = c.client.PullRequests.ListChanges(ctx, fullName, number, opts)
+		if err != nil {
+			return nil, err
+		}
+		firstRun = true
+		allChanges = append(allChanges, changes...)
+		opts.Page++
+	}
+	return allChanges, nil
+}

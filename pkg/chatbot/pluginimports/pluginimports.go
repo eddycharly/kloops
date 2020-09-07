@@ -40,7 +40,7 @@ import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/retitle"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/shrug"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/sigmention"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/size"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/size"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/skip"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/slackevents"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/stage"

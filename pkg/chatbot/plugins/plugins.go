@@ -62,6 +62,8 @@ type PluginScmClient interface {
 	GetIssueLabels(string, string, int, bool) ([]*scm.Label, error)
 	AddLabel(string, string, int, string, bool) error
 	RemoveLabel(string, string, int, string, bool) error
+	GetFile(org, repo, filepath, commit string) ([]byte, error)
+	GetPullRequestChanges(org, repo string, number int) ([]*scm.Change, error)
 }
 
 type PluginRequest interface {

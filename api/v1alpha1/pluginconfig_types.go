@@ -27,6 +27,7 @@ type PluginConfigSpec struct {
 	// Built-in plugins specific configuration.
 	Cat   Cat   `json:"cat,omitempty"`
 	Goose Goose `json:"goose,omitempty"`
+	Size  Size  `json:"size,omitempty"`
 }
 
 // Cat contains the configuration for the cat plugin.
@@ -39,6 +40,16 @@ type Cat struct {
 type Goose struct {
 	// Key is the api key for unsplash.com
 	Key Secret `json:"key"`
+}
+
+// Size specifies configuration for the size plugin, defining lower bounds (in # lines changed) for each size label.
+// XS is assumed to be zero.
+type Size struct {
+	S   int `json:"s"`
+	M   int `json:"m"`
+	L   int `json:"l"`
+	Xl  int `json:"xl"`
+	Xxl int `json:"xxl"`
 }
 
 // Owners contains configuration related to handling OWNERS files.
