@@ -21,7 +21,7 @@ const AboutThisBotCommands = "I understand the commands that are listed [here](h
 const AboutThisBot = AboutThisBotWithoutCommands + " " + AboutThisBotCommands
 
 // FormatResponse nicely formats a response to a generic reason.
-func FormatResponse(to, message, reason string) string {
+func FormatResponse(scmTools ScmTools, to, message, reason string) string {
 	format := `@%s:
 
 %s
@@ -33,12 +33,12 @@ func FormatResponse(to, message, reason string) string {
 %s
 </details>`
 
-	return fmt.Sprintf(format, to, message, reason, AboutThisBotWithoutCommands)
+	return fmt.Sprintf(format, scmTools.QuoteAuthorForComment(to), message, reason, AboutThisBotWithoutCommands)
 }
 
 // FormatSimpleResponse formats a response that does not warrant additional explanation in the
 // details section.
-func FormatSimpleResponse(to, message string) string {
+func FormatSimpleResponse(scmTools ScmTools, to, message string) string {
 	format := `@%s:
 
 %s
@@ -48,16 +48,16 @@ func FormatSimpleResponse(to, message string) string {
 %s
 </details>`
 
-	return fmt.Sprintf(format, to, message, AboutThisBotWithoutCommands)
+	return fmt.Sprintf(format, scmTools.QuoteAuthorForComment(to), message, AboutThisBotWithoutCommands)
 }
 
 // FormatCommentResponse nicely formats a response to an issue comment.
-func FormatCommentResponse(ic scm.Comment, s string) string {
-	return FormatResponseRaw(ic.Body, ic.Link, ic.Author.Login, s)
+func FormatCommentResponse(scmTools ScmTools, ic scm.Comment, s string) string {
+	return FormatResponseRaw(scmTools, ic.Body, ic.Link, ic.Author.Login, s)
 }
 
 // FormatResponseRaw nicely formats a response for one does not have an issue comment
-func FormatResponseRaw(body, bodyURL, login, reply string) string {
+func FormatResponseRaw(scmTools ScmTools, body, bodyURL, login, reply string) string {
 	format := `In response to [this](%s):
 
 %s
@@ -67,20 +67,22 @@ func FormatResponseRaw(body, bodyURL, login, reply string) string {
 	for _, l := range strings.Split(body, "\n") {
 		quoted = append(quoted, ">"+l)
 	}
-	return FormatResponse(login, reply, fmt.Sprintf(format, bodyURL, strings.Join(quoted, "\n")))
+	return FormatResponse(scmTools, login, reply, fmt.Sprintf(format, bodyURL, strings.Join(quoted, "\n")))
 }
 
-// TODO QuoteAuthorForComment
+type ScmTools interface {
+	QuoteAuthorForComment(string) string
+}
 
 type ScmComments interface {
 	CreateComment(context.Context, string, int, *scm.CommentInput) (*scm.Comment, *scm.Response, error)
 }
 
-func CreateComment(scmClient ScmComments, repo scm.Repository, number int, comment scm.Comment, msg string) error {
+func CreateComment(scmComments ScmComments, scmTools ScmTools, repo scm.Repository, number int, comment scm.Comment, msg string) error {
 	commentInput := scm.CommentInput{
-		Body: FormatCommentResponse(comment, msg),
+		Body: FormatCommentResponse(scmTools, comment, msg),
 	}
-	_, response, err := scmClient.CreateComment(context.Background(), repo.FullName, number, &commentInput)
+	_, response, err := scmComments.CreateComment(context.Background(), repo.FullName, number, &commentInput)
 	if err != nil {
 		var b bytes.Buffer
 		_, cperr := io.Copy(&b, response.Body)

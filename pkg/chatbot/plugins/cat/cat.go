@@ -158,16 +158,16 @@ func (c *realClowder) readCat(category string, movieCat bool) (string, error) {
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
 	issues := request.ScmClient().GetClient().Issues
 	setKey := func() { meow.setKey(request.Client(), request.Namespace(), request.PluginConfig().Cat.Key) }
-	return handle(issues, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, meow, setKey)
+	return handle(issues, request.ScmTools(), request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, meow, setKey)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
 	pulls := request.ScmClient().GetClient().PullRequests
 	setKey := func() { meow.setKey(request.Client(), request.Namespace(), request.PluginConfig().Cat.Key) }
-	return handle(pulls, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, meow, setKey)
+	return handle(pulls, request.ScmTools(), request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, meow, setKey)
 }
 
-func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, c clowder, setKey func()) error {
+func handle(client scmClient, scmTools utils.ScmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, c clowder, setKey func()) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
@@ -177,12 +177,10 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 	if mat == nil {
 		return nil
 	}
-
 	category, movieCat, err := parseMatch(mat)
 	if err != nil {
 		return err
 	}
-
 	// Now that we know this is a relevant event we can set the key.
 	setKey()
 
@@ -193,7 +191,7 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 			continue
 		}
 		logger.Info(resp)
-		err = utils.CreateComment(client, repo, number, comment, resp)
+		err = utils.CreateComment(client, scmTools, repo, number, comment, resp)
 		if err != nil {
 			logger.Error(err, "Failed to create comment")
 		}
@@ -203,7 +201,7 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 	if category != "" {
 		msg = "Bad category. Please see https://api.thecatapi.com/api/categories/list"
 	}
-	err = utils.CreateComment(client, repo, number, comment, msg)
+	err = utils.CreateComment(client, scmTools, repo, number, comment, msg)
 	if err != nil {
 		logger.Error(err, "Failed to leave comment")
 	}

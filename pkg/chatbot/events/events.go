@@ -73,6 +73,9 @@ func (e *events) makePluginRequest(repoConfig *v1alpha1.RepoConfig, pluginConfig
 			client:  scmClient,
 			botName: repoConfig.Spec.BotName,
 		},
+		scmTools: &pluginScmTools{
+			client: scmClient,
+		},
 	}
 }
 

@@ -20,6 +20,7 @@ import (
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/git"
+	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -70,6 +71,7 @@ type PluginRequest interface {
 	RepoConfig() *v1alpha1.RepoConfigSpec
 	PluginConfig() *v1alpha1.PluginConfigSpec
 	ScmClient() PluginScmClient
+	ScmTools() utils.ScmTools
 	GitClient() git.Client
 	Client() client.Client
 	Logger() logr.Logger

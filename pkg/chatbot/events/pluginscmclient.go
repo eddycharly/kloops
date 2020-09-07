@@ -18,6 +18,17 @@ func NoLabelProviders() sets.String {
 	return sets.NewString("stash", "coding")
 }
 
+type pluginScmTools struct {
+	client *scm.Client
+}
+
+func (c *pluginScmTools) QuoteAuthorForComment(author string) string {
+	if c.client.Driver == scm.DriverStash {
+		return `"` + author + `"`
+	}
+	return author
+}
+
 type pluginScmClient struct {
 	client  *scm.Client
 	botName string
