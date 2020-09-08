@@ -23,19 +23,19 @@ type scmTools interface {
 	QuoteAuthorForComment(string) string
 }
 
-var (
-	match           = regexp.MustCompile(`(?mi)^/(woof|bark)\s*$`)
-	fineRegex       = regexp.MustCompile(`(?mi)^/this-is-fine\s*$`)
-	notFineRegex    = regexp.MustCompile(`(?mi)^/this-is-not-fine\s*$`)
-	unbearableRegex = regexp.MustCompile(`(?mi)^/this-is-unbearable\s*$`)
-)
-
 const (
 	defaultFineImagesRoot = "https://storage.googleapis.com/this-is-fine-images/"
 	fineIMG               = "this_is_fine.png"
 	notFineIMG            = "this_is_not_fine.png"
 	unbearableIMG         = "this_is_unbearable.jpg"
 	pluginName            = "dog"
+)
+
+var (
+	match           = regexp.MustCompile(`(?mi)^/(woof|bark)\s*$`)
+	fineRegex       = regexp.MustCompile(`(?mi)^/this-is-fine\s*$`)
+	notFineRegex    = regexp.MustCompile(`(?mi)^/this-is-not-fine\s*$`)
+	unbearableRegex = regexp.MustCompile(`(?mi)^/this-is-unbearable\s*$`)
 )
 
 func init() {
@@ -121,6 +121,5 @@ func formatResponse(image string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("invalid image url %s: %v", image, err)
 	}
-	return fmt.Sprintf("![cat image](%s)", img), nil
-
+	return fmt.Sprintf("![dog image](%s)", img), nil
 }

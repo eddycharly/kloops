@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-const baseURL = "https://api.thecatapi.com/v1/images/search?format=json&results_per_page=1"
+const baseURL = "https://api.unsplash.com/photos/random"
 
 type catResult struct {
 	Image string `json:"url"`

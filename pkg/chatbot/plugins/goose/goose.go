@@ -18,34 +18,35 @@ limitations under the License.
 package goose
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"regexp"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
+	"github.com/eddycharly/kloops/pkg/clients/unsplash"
 	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+type scmClient interface {
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
+	ImageTooBig(string) (bool, error)
+	QuoteAuthorForComment(string) string
+}
+
+const (
+	pluginName = "goose"
 )
 
 var (
 	match = regexp.MustCompile(`(?mi)^/(honk)\s*$`)
-	honk  = &realGaggle{
-		url: "https://api.unsplash.com/photos/random?query=goose",
-	}
-)
-
-const (
-	pluginName = "goose"
 )
 
 func init() {
@@ -71,125 +72,17 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 	return pluginHelp, nil
 }
 
-type scmClient interface {
-	CreateComment(string, int, string) error
-}
-
-type scmTools interface {
-	ImageTooBig(string) (bool, error)
-	QuoteAuthorForComment(string) string
-}
-
-type gaggle interface {
-	readGoose(scmTools) (string, error)
-}
-
-type realGaggle struct {
-	url    string
-	lock   sync.RWMutex
-	update time.Time
-	key    string
-}
-
-func (g *realGaggle) setKey(client client.Client, namespace string, secret v1alpha1.Secret) {
-	g.lock.Lock()
-	defer g.lock.Unlock()
-	if !time.Now().After(g.update) {
-		return
-	}
-	g.update = time.Now().Add(1 * time.Minute)
-	key, err := utils.GetSecret(client, namespace, secret)
-	if err == nil {
-		g.key = strings.TrimSpace(string(key))
-		return
-	}
-	// log.WithValues("keyPath", keyPath).Error(err, "failed to read key")
-	g.key = ""
-}
-
-type gooseResult struct {
-	ID     string   `json:"id"`
-	Images imageSet `json:"urls"`
-}
-
-type imageSet struct {
-	Raw     string `json:"raw"`
-	Full    string `json:"full"`
-	Regular string `json:"regular"`
-	Small   string `json:"small"`
-	Thumb   string `json:"thumb"`
-}
-
-func (gr gooseResult) Format() (string, error) {
-	if gr.Images.Small == "" {
-		return "", errors.New("empty image url")
-	}
-	img, err := url.Parse(gr.Images.Small)
-	if err != nil {
-		return "", fmt.Errorf("invalid image url %s: %v", gr.Images.Small, err)
-	}
-
-	return fmt.Sprintf("\n![goose image](%s)", img), nil
-}
-
-func (g *realGaggle) URL() string {
-	g.lock.RLock()
-	defer g.lock.RUnlock()
-	uri := string(g.url)
-	if g.key != "" {
-		uri += "&client_id=" + url.QueryEscape(g.key)
-	}
-	return uri
-}
-
-func (g *realGaggle) readGoose(scmTools scmTools) (string, error) {
-	geese := make([]gooseResult, 1)
-	uri := g.URL()
-	resp, err := http.Get(uri)
-	if err != nil {
-		return "", fmt.Errorf("could not read goose from %s: %v", uri, err)
-	}
-	defer resp.Body.Close()
-	if sc := resp.StatusCode; sc > 299 || sc < 200 {
-		return "", fmt.Errorf("failing %d response from %s", sc, uri)
-	}
-	if err = json.NewDecoder(resp.Body).Decode(&geese[0]); err != nil {
-		return "", err
-	}
-	if len(geese) < 1 {
-		return "", fmt.Errorf("no geese in response from %s", uri)
-	}
-	a := geese[0]
-	if a.Images.Small == "" {
-		return "", fmt.Errorf("no image url in response from %s", uri)
-	}
-	// checking size, GitHub doesn't support big images
-	toobig, err := scmTools.ImageTooBig(a.Images.Small)
-	if err != nil {
-		return "", fmt.Errorf("could not validate image size %s: %v", a.Images.Small, err)
-	} else if toobig {
-		return "", fmt.Errorf("long goose is too long: %s", a.Images.Small)
-	}
-	return a.Format()
-}
-
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
 	scmClient := request.ScmClient()
-	setKey := func() {
-		honk.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Goose.Key)
-	}
-	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, honk, setKey)
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, getKey(request))
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
 	scmClient := request.ScmClient()
-	setKey := func() {
-		honk.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Goose.Key)
-	}
-	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, honk, setKey)
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, getKey(request))
 }
 
-func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, g gaggle, setKey func()) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, getKey func() string) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
@@ -199,23 +92,48 @@ func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Re
 	if mat == nil {
 		return nil
 	}
+	// Fetch image
+	image, err := fetchImage(scmTools, getKey())
+	if err != nil {
+		logger.Error(err, "Failed to get cat img")
+		return err
+	}
+	// Format the response comment
+	rspn, err := formatResponse(image)
+	if err != nil {
+		logger.Error(err, "Failed to format response")
+		return err
+	}
+	return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, rspn))
+}
 
-	// Now that we know this is a relevant event we can set the key.
-	setKey()
-
-	for i := 0; i < 3; i++ {
-		resp, err := g.readGoose(scmTools)
-		if err != nil {
-			logger.Error(err, "Failed to get goose img")
-			continue
+func getKey(request plugins.PluginRequest) func() string {
+	return func() string {
+		key, err := utils.GetSecret(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Goose.Key)
+		if err == nil {
+			return string(key)
 		}
-		return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, resp))
+		return ""
 	}
+}
 
-	msg := "Unable to find goose. Have you checked the garden?"
-	if err := client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, msg)); err != nil {
-		logger.Error(err, "Failed to leave comment")
+func fetchImage(scmTools scmTools, key string) (string, error) {
+	for i := 0; i < 3; i++ {
+		image, err := unsplash.Search("goose", key)
+		if err == nil {
+			toobig, err := scmTools.ImageTooBig(image)
+			if err == nil && !toobig {
+				return image, nil
+			}
+		}
 	}
+	return "", errors.New("Failed to find a goose image")
+}
 
-	return errors.New("could not find a valid goose image")
+func formatResponse(image string) (string, error) {
+	img, err := url.Parse(image)
+	if err != nil {
+		return "", fmt.Errorf("invalid image url %s: %v", image, err)
+	}
+	return fmt.Sprintf("![goose image](%s)", img), nil
 }

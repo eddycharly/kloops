@@ -25,14 +25,14 @@ type scmTools interface {
 	QuoteAuthorForComment(string) string
 }
 
-var (
-	match          = regexp.MustCompile(`(?mi)^/(?:lh-)?meow(vie)?(?: (.+))?\s*$`)
-	grumpyKeywords = regexp.MustCompile(`(?mi)^(no|grumpy)\s*$`)
-)
-
 const (
 	pluginName = "cat"
 	grumpyURL  = "https://upload.wikimedia.org/wikipedia/commons/e/ee/Grumpy_Cat_by_Gage_Skidmore.jpg"
+)
+
+var (
+	match          = regexp.MustCompile(`(?mi)^/(?:lh-)?meow(vie)?(?: (.+))?\s*$`)
+	grumpyKeywords = regexp.MustCompile(`(?mi)^(no|grumpy)\s*$`)
 )
 
 func init() {
@@ -139,5 +139,4 @@ func formatResponse(image string) (string, error) {
 		return "", fmt.Errorf("invalid image url %s: %v", image, err)
 	}
 	return fmt.Sprintf("![cat image](%s)", img), nil
-
 }
