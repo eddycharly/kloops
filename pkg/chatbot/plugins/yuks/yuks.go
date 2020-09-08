@@ -18,27 +18,33 @@ package yuks
 
 import (
 	"bytes"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"net/http"
 	"regexp"
 
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
+	"github.com/eddycharly/kloops/pkg/clients/icanhazdadjoke"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
+)
+
+type scmClient interface {
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
+	QuoteAuthorForComment(string) string
+}
+
+const (
+	pluginName = "yuks"
 )
 
 var (
 	match  = regexp.MustCompile(`(?mi)^/joke\s*$`)
 	simple = regexp.MustCompile(`^[\w?'!., ]+$`)
-)
-
-const (
-	// Previously: https://tambal.azurewebsites.net/joke/random
-	jokeURL    = realJoke("https://icanhazdadjoke.com")
-	pluginName = "yuks"
 )
 
 func init() {
@@ -62,55 +68,44 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 	return pluginHelp, nil
 }
 
-type scmClient interface {
-	CreateComment(string, int, string) error
-}
-
-type scmTools interface {
-	QuoteAuthorForComment(string) string
-}
-
-type joker interface {
-	readJoke() (string, error)
-}
-
-type realJoke string
-
-var client = http.Client{}
-
-type jokeResult struct {
-	Joke string `json:"joke"`
-}
-
-func (url realJoke) readJoke() (string, error) {
-	req, err := http.NewRequest("GET", string(url), nil)
-	if err != nil {
-		return "", fmt.Errorf("could not create request %s: %v", url, err)
-	}
-	req.Header.Add("Accept", "application/json")
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("could not read joke from %s: %v", url, err)
-	}
-	defer resp.Body.Close()
-	var a jokeResult
-	if err = json.NewDecoder(resp.Body).Decode(&a); err != nil {
-		return "", err
-	}
-	if a.Joke == "" {
-		return "", fmt.Errorf("result from %s did not contain a joke", url)
-	}
-	return a.Joke, nil
-}
-
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
 	scmClient := request.ScmClient()
-	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, jokeURL)
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
 	scmClient := request.ScmClient()
-	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, jokeURL)
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number)
+}
+
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int) error {
+	// Only consider new comments.
+	if action != scm.ActionCreate {
+		return nil
+	}
+	// Make sure they are requesting a joke
+	if !match.MatchString(comment.Body) {
+		return nil
+	}
+	// Fetch joke
+	joke, err := fetchJoke()
+	if err != nil {
+		logger.Error(err, "Failed to get joke")
+		return err
+	}
+	// Format the response comment
+	rspn := escapeMarkdown(joke)
+	return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, rspn))
+}
+
+func fetchJoke() (string, error) {
+	for i := 0; i < 3; i++ {
+		joke, err := icanhazdadjoke.Get()
+		if err == nil {
+			return joke, nil
+		}
+	}
+	return "", errors.New("Failed to find a joke")
 }
 
 // escapeMarkdown takes a string and returns a serialized version of it such that all the symbols
@@ -128,32 +123,4 @@ func escapeMarkdown(s string) string {
 		}
 	}
 	return b.String()
-}
-func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, j joker) error {
-	// Only consider new comments.
-	if action != scm.ActionCreate {
-		return nil
-	}
-	// Make sure they are requesting a joke
-	if !match.MatchString(comment.Body) {
-		return nil
-	}
-
-	errorBudget := 5
-	for i := 1; i <= errorBudget; i++ {
-		resp, err := j.readJoke()
-		if err != nil {
-			logger.WithValues("attempt", i).Error(err, "failed to get joke")
-			continue
-		}
-		if resp == "" {
-			logger.WithValues("attempt", i).Info("joke is empty")
-			continue
-		}
-		sanitizedJoke := escapeMarkdown(resp)
-		logger.WithValues("joke", sanitizedJoke).Info("commenting")
-		return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, sanitizedJoke))
-	}
-
-	return fmt.Errorf("failed to get joke after %d attempts", errorBudget)
 }
