@@ -72,12 +72,16 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 }
 
 type scmClient interface {
-	CreateComment(owner, repo string, number int, pr bool, comment string) error
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
+	ImageTooBig(string) (bool, error)
 	QuoteAuthorForComment(string) string
 }
 
 type gaggle interface {
-	readGoose() (string, error)
+	readGoose(scmTools) (string, error)
 }
 
 type realGaggle struct {
@@ -138,7 +142,7 @@ func (g *realGaggle) URL() string {
 	return uri
 }
 
-func (g *realGaggle) readGoose() (string, error) {
+func (g *realGaggle) readGoose(scmTools scmTools) (string, error) {
 	geese := make([]gooseResult, 1)
 	uri := g.URL()
 	resp, err := http.Get(uri)
@@ -160,7 +164,7 @@ func (g *realGaggle) readGoose() (string, error) {
 		return "", fmt.Errorf("no image url in response from %s", uri)
 	}
 	// checking size, GitHub doesn't support big images
-	toobig, err := utils.ImageTooBig(a.Images.Small)
+	toobig, err := scmTools.ImageTooBig(a.Images.Small)
 	if err != nil {
 		return "", fmt.Errorf("could not validate image size %s: %v", a.Images.Small, err)
 	} else if toobig {
@@ -170,16 +174,22 @@ func (g *realGaggle) readGoose() (string, error) {
 }
 
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
-	setKey := func() { honk.setKey(request.Client(), request.Namespace(), request.PluginConfig().Goose.Key) }
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, false, honk, setKey)
+	scmClient := request.ScmClient()
+	setKey := func() {
+		honk.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Goose.Key)
+	}
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, honk, setKey)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
-	setKey := func() { honk.setKey(request.Client(), request.Namespace(), request.PluginConfig().Goose.Key) }
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, true, honk, setKey)
+	scmClient := request.ScmClient()
+	setKey := func() {
+		honk.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Goose.Key)
+	}
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, honk, setKey)
 }
 
-func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, pr bool, g gaggle, setKey func()) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, g gaggle, setKey func()) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
@@ -194,28 +204,16 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 	setKey()
 
 	for i := 0; i < 3; i++ {
-		resp, err := g.readGoose()
+		resp, err := g.readGoose(scmTools)
 		if err != nil {
 			logger.Error(err, "Failed to get goose img")
 			continue
 		}
-		return client.CreateComment(
-			repo.Namespace,
-			repo.Name,
-			number,
-			pr,
-			plugins.FormatResponseRaw(comment.Body, comment.Link, client.QuoteAuthorForComment(comment.Author.Login), resp),
-		)
+		return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, resp))
 	}
 
 	msg := "Unable to find goose. Have you checked the garden?"
-	if err := client.CreateComment(
-		repo.Namespace,
-		repo.Name,
-		number,
-		pr,
-		plugins.FormatResponseRaw(comment.Body, comment.Link, client.QuoteAuthorForComment(comment.Author.Login), msg),
-	); err != nil {
+	if err := client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, msg)); err != nil {
 		logger.Error(err, "Failed to leave comment")
 	}
 

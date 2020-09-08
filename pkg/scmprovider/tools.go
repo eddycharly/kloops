@@ -1,13 +1,26 @@
-package utils
+package scmprovider
 
 import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/jenkins-x/go-scm/scm"
 )
 
+type Tools struct {
+	client *scm.Client
+}
+
+func (s Tools) QuoteAuthorForComment(author string) string {
+	if s.client.Driver == scm.DriverStash {
+		return `"` + author + `"`
+	}
+	return author
+}
+
 // ImageTooBig checks if image is bigger than github limits
-func ImageTooBig(url string) (bool, error) {
+func (s Tools) ImageTooBig(url string) (bool, error) {
 	// limit is 10MB
 	limit := 10000000
 	// try to get the image size from Content-Length header

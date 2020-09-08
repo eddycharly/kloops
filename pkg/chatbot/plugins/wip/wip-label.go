@@ -28,6 +28,7 @@ import (
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
+	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
 )
 
@@ -56,34 +57,30 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 
 // Strict subset of SCM.Client methods.
 type scmClient interface {
-	GetIssueLabels(org, repo string, number int) ([]scm.Label, error)
-	AddLabel(owner, repo string, number int, label string) error
-	RemoveLabel(owner, repo string, number int, label string) error
+	AddLabel(string, int, string) error
+	RemoveLabel(string, int, string) error
+	GetLabels(string, int) ([]*scm.Label, error)
 }
 
 func handlePullRequest(request plugins.PluginRequest, event *scm.PullRequestHook) error {
 	logger := request.Logger()
 	scmClient := request.ScmClient()
+	return handle(scmClient.PullRequests, logger, event.Repository(), event.Action, event.PullRequest)
+}
+
+func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, pr scm.PullRequest) error {
 	// These are the only actions indicating the PR title may have changed.
-	if event.Action != scm.ActionOpen &&
-		event.Action != scm.ActionReopen &&
-		event.Action != scm.ActionEdited &&
-		event.Action != scm.ActionUpdate &&
-		event.Action != scm.ActionReadyForReview {
+	if action != scm.ActionOpen &&
+		action != scm.ActionReopen &&
+		action != scm.ActionEdited &&
+		action != scm.ActionUpdate &&
+		action != scm.ActionReadyForReview {
 		return nil
 	}
 
-	var (
-		org    = event.PullRequest.Base.Repo.Namespace
-		repo   = event.PullRequest.Base.Repo.Name
-		number = event.PullRequest.Number
-		title  = event.PullRequest.Title
-		draft  = event.PullRequest.Draft
-	)
-
-	currentLabels, err := scmClient.GetIssueLabels(org, repo, number, true)
+	currentLabels, err := client.GetLabels(repo.FullName, pr.Number)
 	if err != nil {
-		return fmt.Errorf("could not get labels for PR %s/%s:%d in WIP plugin: %v", org, repo, number, err)
+		return fmt.Errorf("could not get labels for PR %s:%d in WIP plugin: %v", repo.FullName, pr.Number, err)
 	}
 	hasLabel := false
 	for _, l := range currentLabels {
@@ -91,15 +88,16 @@ func handlePullRequest(request plugins.PluginRequest, event *scm.PullRequestHook
 			hasLabel = true
 		}
 	}
-	needsLabel := draft || titleRegex.MatchString(title)
+
+	needsLabel := pr.Draft || titleRegex.MatchString(pr.Title)
 
 	if needsLabel && !hasLabel {
-		if err := scmClient.AddLabel(org, repo, number, label, true); err != nil {
+		if err := client.AddLabel(repo.FullName, pr.Number, label); err != nil {
 			logger.Error(err, "error while adding label")
 			return err
 		}
 	} else if !needsLabel && hasLabel {
-		if err := scmClient.RemoveLabel(org, repo, number, label, true); err != nil {
+		if err := client.RemoveLabel(repo.FullName, pr.Number, label); err != nil {
 			logger.Error(err, "error while removing label")
 			return err
 		}

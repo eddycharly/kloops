@@ -1,7 +1,6 @@
 package cat
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -58,11 +57,16 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 }
 
 type scmClient interface {
-	CreateComment(context.Context, string, int, *scm.CommentInput) (*scm.Comment, *scm.Response, error)
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
+	ImageTooBig(string) (bool, error)
+	QuoteAuthorForComment(string) string
 }
 
 type clowder interface {
-	readCat(string, bool) (string, error)
+	readCat(scmTools, string, bool) (string, error)
 }
 
 type realClowder struct {
@@ -120,7 +124,7 @@ func (c *realClowder) URL(category string, movieCat bool) string {
 	return uri
 }
 
-func (c *realClowder) readCat(category string, movieCat bool) (string, error) {
+func (c *realClowder) readCat(scmTools scmTools, category string, movieCat bool) (string, error) {
 	cats := make([]catResult, 0)
 	uri := c.URL(category, movieCat)
 	if grumpyKeywords.MatchString(category) {
@@ -146,7 +150,7 @@ func (c *realClowder) readCat(category string, movieCat bool) (string, error) {
 		return "", fmt.Errorf("no image url in response from %s", uri)
 	}
 	// checking size, GitHub doesn't support big images
-	toobig, err := utils.ImageTooBig(a.Image)
+	toobig, err := scmTools.ImageTooBig(a.Image)
 	if err != nil {
 		return "", fmt.Errorf("could not validate image size %s: %v", a.Image, err)
 	} else if toobig {
@@ -156,18 +160,18 @@ func (c *realClowder) readCat(category string, movieCat bool) (string, error) {
 }
 
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
-	issues := request.ScmClient().GetClient().Issues
-	setKey := func() { meow.setKey(request.Client(), request.Namespace(), request.PluginConfig().Cat.Key) }
-	return handle(issues, request.ScmTools(), request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, meow, setKey)
+	scmClient := request.ScmClient()
+	setKey := func() { meow.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Cat.Key) }
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, meow, setKey)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
-	pulls := request.ScmClient().GetClient().PullRequests
-	setKey := func() { meow.setKey(request.Client(), request.Namespace(), request.PluginConfig().Cat.Key) }
-	return handle(pulls, request.ScmTools(), request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, meow, setKey)
+	scmClient := request.ScmClient()
+	setKey := func() { meow.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Cat.Key) }
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repository(), event.Action, event.Comment, event.PullRequest.Number, meow, setKey)
 }
 
-func handle(client scmClient, scmTools utils.ScmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, c clowder, setKey func()) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, c clowder, setKey func()) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
@@ -185,13 +189,13 @@ func handle(client scmClient, scmTools utils.ScmTools, logger logr.Logger, repo 
 	setKey()
 
 	for i := 0; i < 3; i++ {
-		resp, err := c.readCat(category, movieCat)
+		resp, err := c.readCat(scmTools, category, movieCat)
 		if err != nil {
 			logger.Error(err, "Failed to get cat img")
 			continue
 		}
 		logger.Info(resp)
-		err = utils.CreateComment(client, scmTools, repo, number, comment, resp)
+		err = client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, resp))
 		if err != nil {
 			logger.Error(err, "Failed to create comment")
 		}
@@ -201,7 +205,7 @@ func handle(client scmClient, scmTools utils.ScmTools, logger logr.Logger, repo 
 	if category != "" {
 		msg = "Bad category. Please see https://api.thecatapi.com/api/categories/list"
 	}
-	err = utils.CreateComment(client, scmTools, repo, number, comment, msg)
+	err = client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, msg))
 	if err != nil {
 		logger.Error(err, "Failed to leave comment")
 	}

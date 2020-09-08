@@ -2,25 +2,23 @@ package events
 
 import (
 	"github.com/eddycharly/kloops/api/v1alpha1"
-	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 	"github.com/eddycharly/kloops/pkg/git"
-	"github.com/eddycharly/kloops/pkg/utils"
+	"github.com/eddycharly/kloops/pkg/scmprovider"
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type pluginRequest struct {
-	repoConfig   *v1alpha1.RepoConfigSpec
+	repoConfig   *v1alpha1.RepoConfig
 	pluginConfig *v1alpha1.PluginConfigSpec
-	scmClient    *pluginScmClient
-	scmTools     *pluginScmTools
+	scmClient    scmprovider.Client
 	gitClient    git.Client
 	client       client.Client
 	logger       logr.Logger
 	namespace    string
 }
 
-func (pr *pluginRequest) RepoConfig() *v1alpha1.RepoConfigSpec {
+func (pr *pluginRequest) RepoConfig() *v1alpha1.RepoConfig {
 	return pr.repoConfig
 }
 
@@ -28,12 +26,8 @@ func (pr *pluginRequest) PluginConfig() *v1alpha1.PluginConfigSpec {
 	return pr.pluginConfig
 }
 
-func (pr *pluginRequest) ScmClient() plugins.PluginScmClient {
+func (pr *pluginRequest) ScmClient() scmprovider.Client {
 	return pr.scmClient
-}
-
-func (pr *pluginRequest) ScmTools() utils.ScmTools {
-	return pr.scmTools
 }
 
 func (pr *pluginRequest) GitClient() git.Client {
@@ -46,8 +40,4 @@ func (pr *pluginRequest) Client() client.Client {
 
 func (pr *pluginRequest) Logger() logr.Logger {
 	return pr.logger
-}
-
-func (pr *pluginRequest) Namespace() string {
-	return pr.namespace
 }

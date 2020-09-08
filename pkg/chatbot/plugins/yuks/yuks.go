@@ -63,7 +63,10 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 }
 
 type scmClient interface {
-	CreateComment(owner, repo string, number int, pr bool, comment string) error
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
 	QuoteAuthorForComment(string) string
 }
 
@@ -101,11 +104,13 @@ func (url realJoke) readJoke() (string, error) {
 }
 
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, false, jokeURL)
+	scmClient := request.ScmClient()
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, jokeURL)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, true, jokeURL)
+	scmClient := request.ScmClient()
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, jokeURL)
 }
 
 // escapeMarkdown takes a string and returns a serialized version of it such that all the symbols
@@ -124,7 +129,7 @@ func escapeMarkdown(s string) string {
 	}
 	return b.String()
 }
-func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, pr bool, j joker) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, j joker) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
@@ -147,13 +152,7 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 		}
 		sanitizedJoke := escapeMarkdown(resp)
 		logger.WithValues("joke", sanitizedJoke).Info("commenting")
-		return client.CreateComment(
-			repo.Namespace,
-			repo.Name,
-			number,
-			pr,
-			plugins.FormatResponseRaw(comment.Body, comment.Link, client.QuoteAuthorForComment(comment.Author.Login), sanitizedJoke),
-		)
+		return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, sanitizedJoke))
 	}
 
 	return fmt.Errorf("failed to get joke after %d attempts", errorBudget)

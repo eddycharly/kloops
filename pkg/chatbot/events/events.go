@@ -6,6 +6,7 @@ import (
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 	"github.com/eddycharly/kloops/pkg/git"
+	"github.com/eddycharly/kloops/pkg/scmprovider"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -63,19 +64,13 @@ func (e *events) ProcessWebHook(repoConfig *v1alpha1.RepoConfig, pluginConfig *v
 
 func (e *events) makePluginRequest(repoConfig *v1alpha1.RepoConfig, pluginConfig *v1alpha1.PluginConfigSpec, scmClient *scm.Client, loggerName string) plugins.PluginRequest {
 	return &pluginRequest{
-		repoConfig:   &repoConfig.Spec,
+		repoConfig:   repoConfig,
 		pluginConfig: pluginConfig,
 		gitClient:    e.gitClient,
 		client:       e.client,
 		logger:       e.logger.WithName(loggerName),
 		namespace:    repoConfig.Namespace,
-		scmClient: &pluginScmClient{
-			client:  scmClient,
-			botName: repoConfig.Spec.BotName,
-		},
-		scmTools: &pluginScmTools{
-			client: scmClient,
-		},
+		scmClient:    scmprovider.NewClient(scmClient),
 	}
 }
 

@@ -59,10 +59,13 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 }
 
 type scmClient interface {
-	AddLabel(owner, repo string, number int, label string, pr bool) error
-	CreateComment(owner, repo string, number int, pr bool, comment string) error
-	RemoveLabel(owner, repo string, number int, label string, pr bool) error
-	GetIssueLabels(org, repo string, number int, pr bool) ([]*scm.Label, error)
+	AddLabel(string, int, string) error
+	RemoveLabel(string, int, string) error
+	GetLabels(string, int) ([]*scm.Label, error)
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
 	QuoteAuthorForComment(string) string
 }
 
@@ -71,14 +74,16 @@ type scmClient interface {
 // }
 
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, false)
+	scmClient := request.ScmClient()
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, true)
+	scmClient := request.ScmClient()
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number)
 }
 
-func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, pr bool) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int) error {
 	if action != scm.ActionCreate {
 		return nil
 	}
@@ -94,7 +99,7 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 
 	// Only add the label if it doesn't have it yet.
 	hasShrug := false
-	issueLabels, err := client.GetIssueLabels(repo.Namespace, repo.Name, number, pr)
+	issueLabels, err := client.GetLabels(repo.FullName, number)
 	if err != nil {
 		logger. /*.WithValues(org, repo, e.Number)*/ Error(err, "Failed to get the labels")
 	}
@@ -107,13 +112,13 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 	if hasShrug && !wantShrug {
 		logger.Info("Removing Shrug label.")
 		resp := "¯\\\\\\_(ツ)\\_/¯"
-		if err := client.CreateComment(repo.Namespace, repo.Name, number, pr, plugins.FormatResponseRaw(comment.Body, comment.Link, client.QuoteAuthorForComment(comment.Author.Login), resp)); err != nil {
+		if err := client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, resp)); err != nil {
 			return fmt.Errorf("failed to comment on %s/%s#%d: %v", repo.Namespace, repo.Name, number, err)
 		}
-		return client.RemoveLabel(repo.Namespace, repo.Name, number, label, pr)
+		return client.RemoveLabel(repo.FullName, number, label)
 	} else if !hasShrug && wantShrug {
 		logger.Info("Adding Shrug label.")
-		return client.AddLabel(repo.Namespace, repo.Name, number, label, pr)
+		return client.AddLabel(repo.FullName, number, label)
 	}
 	return nil
 }

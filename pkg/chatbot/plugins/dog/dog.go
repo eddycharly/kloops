@@ -11,7 +11,6 @@ import (
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
-	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
 )
@@ -55,12 +54,16 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 }
 
 type scmClient interface {
-	CreateComment(owner, repo string, number int, pr bool, comment string) error
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
+	ImageTooBig(string) (bool, error)
 	QuoteAuthorForComment(string) string
 }
 
 type pack interface {
-	readDog(dogURL string) (string, error)
+	readDog(scmTools, string) (string, error)
 }
 
 type realPack string
@@ -83,7 +86,7 @@ func FormatURL(dogURL string) (string, error) {
 	return fmt.Sprintf("[![dog image](%s)](%s)", src, src), nil
 }
 
-func (u realPack) readDog(dogURL string) (string, error) {
+func (u realPack) readDog(scmTools scmTools, dogURL string) (string, error) {
 	if dogURL == "" {
 		uri := string(u)
 		req, err := http.NewRequest("GET", uri, nil)
@@ -108,7 +111,7 @@ func (u realPack) readDog(dogURL string) (string, error) {
 		return "", errors.New("unsupported doggo :( unknown filetype: " + dogURL)
 	}
 	// checking size, GitHub doesn't support big images
-	toobig, err := utils.ImageTooBig(dogURL)
+	toobig, err := scmTools.ImageTooBig(dogURL)
 	if err != nil {
 		return "", err
 	} else if toobig {
@@ -118,14 +121,16 @@ func (u realPack) readDog(dogURL string) (string, error) {
 }
 
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, false, dogURL, defaultFineImagesRoot)
+	scmClient := request.ScmClient()
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, dogURL, defaultFineImagesRoot)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
-	return handle(request.ScmClient(), request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, true, dogURL, defaultFineImagesRoot)
+	scmClient := request.ScmClient()
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, dogURL, defaultFineImagesRoot)
 }
 
-func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, pr bool, p pack, fineImagesRoot string) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, p pack, fineImagesRoot string) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
@@ -149,19 +154,13 @@ func handle(client scmClient, logger logr.Logger, repo scm.Repository, action sc
 	}
 
 	for i := 0; i < 5; i++ {
-		resp, err := p.readDog(url)
+		resp, err := p.readDog(scmTools, url)
 		if err != nil {
 			logger.Error(err, "Failed to get dog img")
 			continue
 		}
 
-		return client.CreateComment(
-			repo.Namespace,
-			repo.Name,
-			number,
-			pr,
-			plugins.FormatResponseRaw(comment.Body, comment.Link, client.QuoteAuthorForComment(comment.Author.Login), resp),
-		)
+		return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, resp))
 	}
 
 	return errors.New("could not find a valid dog image")

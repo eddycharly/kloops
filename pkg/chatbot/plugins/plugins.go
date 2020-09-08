@@ -20,7 +20,7 @@ import (
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/git"
-	"github.com/eddycharly/kloops/pkg/utils"
+	"github.com/eddycharly/kloops/pkg/scmprovider"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,30 +52,28 @@ var (
 // 	statusEventHandlers        = map[string]StatusEventHandler{}
 )
 
-type PluginScmClient interface {
-	BotName() string
-	GetClient() *scm.Client
-	CreateComment(owner, repo string, number int, pr bool, comment string) error
-	EditComment(owner, repo string, number int, pr bool, commentID int, comment string) error
-	DeleteComment(owner, repo string, number int, pr bool, commentID int) error
-	QuoteAuthorForComment(string) string
-	ListPullRequestComments(owner, repo string, number int) ([]*scm.Comment, error)
-	GetIssueLabels(string, string, int, bool) ([]*scm.Label, error)
-	AddLabel(string, string, int, string, bool) error
-	RemoveLabel(string, string, int, string, bool) error
-	GetFile(org, repo, filepath, commit string) ([]byte, error)
-	GetPullRequestChanges(org, repo string, number int) ([]*scm.Change, error)
-}
+// type PluginScmClient interface {
+// 	BotName() string
+// 	GetClient() *scm.Client
+// 	CreateComment(owner, repo string, number int, pr bool, comment string) error
+// 	EditComment(owner, repo string, number int, pr bool, commentID int, comment string) error
+// 	DeleteComment(owner, repo string, number int, pr bool, commentID int) error
+// 	QuoteAuthorForComment(string) string
+// 	ListPullRequestComments(owner, repo string, number int) ([]*scm.Comment, error)
+// 	GetIssueLabels(string, string, int, bool) ([]*scm.Label, error)
+// 	AddLabel(string, string, int, string, bool) error
+// 	RemoveLabel(string, string, int, string, bool) error
+// 	GetFile(org, repo, filepath, commit string) ([]byte, error)
+// 	GetPullRequestChanges(org, repo string, number int) ([]*scm.Change, error)
+// }
 
 type PluginRequest interface {
-	RepoConfig() *v1alpha1.RepoConfigSpec
+	RepoConfig() *v1alpha1.RepoConfig
 	PluginConfig() *v1alpha1.PluginConfigSpec
-	ScmClient() PluginScmClient
-	ScmTools() utils.ScmTools
+	ScmClient() scmprovider.Client
 	GitClient() git.Client
 	Client() client.Client
 	Logger() logr.Logger
-	Namespace() string
 }
 
 // HelpProvider defines the function type that construct a pluginhelp.PluginHelp for enabled
