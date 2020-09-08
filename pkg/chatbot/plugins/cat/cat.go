@@ -1,31 +1,33 @@
 package cat
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
+	"github.com/eddycharly/kloops/pkg/clients/thecatapi"
 	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+type scmClient interface {
+	CreateComment(string, int, string) error
+}
+
+type scmTools interface {
+	ImageTooBig(string) (bool, error)
+	QuoteAuthorForComment(string) string
+}
 
 var (
 	match          = regexp.MustCompile(`(?mi)^/(?:lh-)?meow(vie)?(?: (.+))?\s*$`)
 	grumpyKeywords = regexp.MustCompile(`(?mi)^(no|grumpy)\s*$`)
-	meow           = &realClowder{
-		url: "https://api.thecatapi.com/v1/images/search?format=json&results_per_page=1",
-	}
 )
 
 const (
@@ -56,122 +58,17 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 	return pluginHelp, nil
 }
 
-type scmClient interface {
-	CreateComment(string, int, string) error
-}
-
-type scmTools interface {
-	ImageTooBig(string) (bool, error)
-	QuoteAuthorForComment(string) string
-}
-
-type clowder interface {
-	readCat(scmTools, string, bool) (string, error)
-}
-
-type realClowder struct {
-	url    string
-	lock   sync.RWMutex
-	update time.Time
-	key    string
-}
-
-func (c *realClowder) setKey(client client.Client, namespace string, secret v1alpha1.Secret) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	if !time.Now().After(c.update) {
-		return
-	}
-	c.update = time.Now().Add(1 * time.Minute)
-	key, err := utils.GetSecret(client, namespace, secret)
-	if err == nil {
-		c.key = strings.TrimSpace(string(key))
-		return
-	}
-	// log.WithValues("keyPath", keyPath).Error(err, "failed to read key")
-	c.key = ""
-}
-
-type catResult struct {
-	Image string `json:"url"`
-}
-
-func (cr catResult) Format() (string, error) {
-	if cr.Image == "" {
-		return "", errors.New("empty image url")
-	}
-	img, err := url.Parse(cr.Image)
-	if err != nil {
-		return "", fmt.Errorf("invalid image url %s: %v", cr.Image, err)
-	}
-
-	return fmt.Sprintf("![cat image](%s)", img), nil
-}
-
-func (c *realClowder) URL(category string, movieCat bool) string {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	uri := string(c.url)
-	if category != "" {
-		uri += "&category=" + url.QueryEscape(category)
-	}
-	if c.key != "" {
-		uri += "&api_key=" + url.QueryEscape(c.key)
-	}
-	if movieCat {
-		uri += "&mime_types=gif"
-	}
-	return uri
-}
-
-func (c *realClowder) readCat(scmTools scmTools, category string, movieCat bool) (string, error) {
-	cats := make([]catResult, 0)
-	uri := c.URL(category, movieCat)
-	if grumpyKeywords.MatchString(category) {
-		cats = append(cats, catResult{grumpyURL})
-	} else {
-		resp, err := http.Get(uri) // #nosec
-		if err != nil {
-			return "", fmt.Errorf("could not read cat from %s: %v", uri, err)
-		}
-		defer resp.Body.Close()
-		if sc := resp.StatusCode; sc > 299 || sc < 200 {
-			return "", fmt.Errorf("failing %d response from %s", sc, uri)
-		}
-		if err = json.NewDecoder(resp.Body).Decode(&cats); err != nil {
-			return "", err
-		}
-		if len(cats) < 1 {
-			return "", fmt.Errorf("no cats in response from %s", uri)
-		}
-	}
-	a := cats[0]
-	if a.Image == "" {
-		return "", fmt.Errorf("no image url in response from %s", uri)
-	}
-	// checking size, GitHub doesn't support big images
-	toobig, err := scmTools.ImageTooBig(a.Image)
-	if err != nil {
-		return "", fmt.Errorf("could not validate image size %s: %v", a.Image, err)
-	} else if toobig {
-		return "", fmt.Errorf("longcat is too long: %s", a.Image)
-	}
-	return a.Format()
-}
-
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
 	scmClient := request.ScmClient()
-	setKey := func() { meow.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Cat.Key) }
-	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, meow, setKey)
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, getKey(request))
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
 	scmClient := request.ScmClient()
-	setKey := func() { meow.setKey(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Cat.Key) }
-	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repository(), event.Action, event.Comment, event.PullRequest.Number, meow, setKey)
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repository(), event.Action, event.Comment, event.PullRequest.Number, getKey(request))
 }
 
-func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, c clowder, setKey func()) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, getKey func() string) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
@@ -185,31 +82,21 @@ func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Re
 	if err != nil {
 		return err
 	}
-	// Now that we know this is a relevant event we can set the key.
-	setKey()
-
-	for i := 0; i < 3; i++ {
-		resp, err := c.readCat(scmTools, category, movieCat)
-		if err != nil {
-			logger.Error(err, "Failed to get cat img")
-			continue
-		}
-		logger.Info(resp)
-		err = client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, resp))
-		if err != nil {
-			logger.Error(err, "Failed to create comment")
-		}
+	// Fetch image
+	image, err := fetchImage(scmTools, category, movieCat, getKey())
+	if err != nil {
+		logger.Error(err, "Failed to get cat img")
 		return err
 	}
-	msg := "https://thecatapi.com appears to be down"
-	if category != "" {
-		msg = "Bad category. Please see https://api.thecatapi.com/api/categories/list"
-	}
-	err = client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, msg))
+	// Now that we know this is a relevant event we can set the key.
+	// setKey()
+	rspn, err := formatResponse(image)
 	if err != nil {
-		logger.Error(err, "Failed to leave comment")
+		logger.Error(err, "Failed to format response")
+		return err
 	}
-	return errors.New("could not find a valid cat image")
+	err = client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, rspn))
+	return nil
 }
 
 func parseMatch(mat []string) (string, bool, error) {
@@ -220,4 +107,39 @@ func parseMatch(mat []string) (string, bool, error) {
 	category := strings.TrimSpace(mat[2])
 	movieCat := len(mat[1]) > 0 // "vie" suffix is present.
 	return category, movieCat, nil
+}
+
+func getKey(request plugins.PluginRequest) func() string {
+	return func() string {
+		key, err := utils.GetSecret(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Cat.Key)
+		if err == nil {
+			return string(key)
+		}
+		return ""
+	}
+}
+
+func fetchImage(scmTools scmTools, category string, movieCat bool, key string) (string, error) {
+	if grumpyKeywords.MatchString(category) {
+		return grumpyURL, nil
+	}
+	for i := 0; i < 3; i++ {
+		image, err := thecatapi.Search(category, movieCat, key)
+		if err == nil {
+			toobig, err := scmTools.ImageTooBig(image)
+			if err == nil && !toobig {
+				return image, nil
+			}
+		}
+	}
+	return "", errors.New("Failed to find a cat image")
+}
+
+func formatResponse(image string) (string, error) {
+	img, err := url.Parse(image)
+	if err != nil {
+		return "", fmt.Errorf("invalid image url %s: %v", image, err)
+	}
+	return fmt.Sprintf("![cat image](%s)", img), nil
+
 }
