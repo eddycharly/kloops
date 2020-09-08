@@ -22,7 +22,7 @@ type imageSet struct {
 	Thumb   string `json:"thumb"`
 }
 
-// Search performs a search request, i can take a category and allows searching through gif images
+// Search performs a search request, it can take a queery
 func Search(query string, key string) (string, error) {
 	resp, err := http.Get(getURL(query, key)) // #nosec
 	if err != nil {
