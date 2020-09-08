@@ -1,39 +1,30 @@
 package pony
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"regexp"
-	"strings"
 
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
+	"github.com/eddycharly/kloops/pkg/clients/theponyapi"
 	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
 )
 
-// Only the properties we actually use.
-type ponyResult struct {
-	Pony ponyResultPony `json:"pony"`
+type scmClient interface {
+	CreateComment(string, int, string) error
 }
 
-type ponyResultPony struct {
-	Representations ponyRepresentations `json:"representations"`
-}
-
-type ponyRepresentations struct {
-	Full  string `json:"full"`
-	Small string `json:"small"`
+type scmTools interface {
+	ImageTooBig(string) (bool, error)
+	QuoteAuthorForComment(string) string
 }
 
 const (
-	ponyURL    = realHerd("https://theponyapi.com/api/v1/pony/random")
 	pluginName = "pony"
-	maxPonies  = 5
 )
 
 var (
@@ -61,104 +52,58 @@ func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, er
 	return pluginHelp, nil
 }
 
-var client = http.Client{}
-
-type scmClient interface {
-	CreateComment(string, int, string) error
-}
-
-type scmTools interface {
-	ImageTooBig(string) (bool, error)
-	QuoteAuthorForComment(string) string
-}
-
-type herd interface {
-	readPony(scmTools, string) (string, error)
-}
-
-type realHerd string
-
-func formatURLs(small, full string) string {
-	return fmt.Sprintf("[![pony image](%s)](%s)", small, full)
-}
-
-func (h realHerd) readPony(scmTools scmTools, tags string) (string, error) {
-	uri := string(h) + "?q=" + url.QueryEscape(tags)
-	resp, err := client.Get(uri)
-	if err != nil {
-		return "", fmt.Errorf("failed to make request: %v", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("no pony found")
-	}
-	var a ponyResult
-	if err = json.NewDecoder(resp.Body).Decode(&a); err != nil {
-		return "", fmt.Errorf("failed to decode response: %v", err)
-	}
-
-	embedded := a.Pony.Representations.Small
-	tooBig, err := scmTools.ImageTooBig(embedded)
-	if err != nil {
-		return "", fmt.Errorf("couldn't fetch pony for size check: %v", err)
-	}
-	if tooBig {
-		return "", fmt.Errorf("the pony is too big")
-	}
-	return formatURLs(a.Pony.Representations.Small, a.Pony.Representations.Full), nil
-}
-
 func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
 	scmClient := request.ScmClient()
-	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, ponyURL)
+	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number)
 }
 
 func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
 	scmClient := request.ScmClient()
-	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number, ponyURL)
+	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.PullRequest.Number)
 }
 
-func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, p herd) error {
+func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int) error {
 	// Only consider new comments.
 	if action != scm.ActionCreate {
 		return nil
 	}
-	// Make sure they are requesting a pony and don't allow requesting more than 'maxPonies' defined.
-	mat := match.FindAllStringSubmatch(comment.Body, maxPonies)
+	// Make sure they are requesting a cat
+	mat := match.FindStringSubmatch(comment.Body)
 	if mat == nil {
 		return nil
 	}
+	// Fetch image
+	image, err := fetchImage(scmTools, mat[1])
+	if err != nil {
+		logger.Error(err, "Failed to get cat img")
+		return err
+	}
+	// Format the response comment
+	rspn, err := formatResponse(image)
+	if err != nil {
+		logger.Error(err, "Failed to format response")
+		return err
+	}
+	return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, rspn))
+}
 
-	var respBuilder strings.Builder
-	var tagsSpecified bool
-	for _, tag := range mat {
-		for i := 0; i < 5; i++ {
-			if tag[1] != "" {
-				tagsSpecified = true
+func fetchImage(scmTools scmTools, tags string) (string, error) {
+	for i := 0; i < 3; i++ {
+		image, err := theponyapi.Search(tags)
+		if err == nil {
+			toobig, err := scmTools.ImageTooBig(image)
+			if err == nil && !toobig {
+				return image, nil
 			}
-			resp, err := p.readPony(scmTools, tag[1])
-			if err != nil {
-				logger.Error(err, "Failed to get a pony")
-				continue
-			}
-			respBuilder.WriteString(resp + "\n")
-			break
 		}
 	}
-	if respBuilder.Len() > 0 {
-		return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, respBuilder.String()))
-	}
+	return "", errors.New("Failed to find a cat image")
+}
 
-	var msg string
-	if tagsSpecified {
-		msg = "Couldn't find a pony matching given tag(s)."
-	} else {
-		msg = "https://theponyapi.com appears to be down"
+func formatResponse(image string) (string, error) {
+	img, err := url.Parse(image)
+	if err != nil {
+		return "", fmt.Errorf("invalid image url %s: %v", image, err)
 	}
-
-	if err := client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, msg)); err != nil {
-		logger.Error(err, "Failed to leave comment")
-	}
-
-	return errors.New("could not find a valid pony image")
+	return fmt.Sprintf("![pony image](%s)", img), nil
 }
