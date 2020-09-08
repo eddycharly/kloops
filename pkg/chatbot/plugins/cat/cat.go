@@ -88,15 +88,13 @@ func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Re
 		logger.Error(err, "Failed to get cat img")
 		return err
 	}
-	// Now that we know this is a relevant event we can set the key.
-	// setKey()
+	// Format the response comment
 	rspn, err := formatResponse(image)
 	if err != nil {
 		logger.Error(err, "Failed to format response")
 		return err
 	}
-	err = client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, rspn))
-	return nil
+	return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, rspn))
 }
 
 func parseMatch(mat []string) (string, bool, error) {
