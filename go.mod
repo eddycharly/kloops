@@ -9,7 +9,7 @@ require (
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
-	github.com/pkg/errors v0.9.0 // indirect
+	github.com/pkg/errors v0.9.0
 	go.uber.org/multierr v1.4.0 // indirect
 	k8s.io/api v0.17.2
 	k8s.io/apimachinery v0.17.2

@@ -21,7 +21,6 @@ import (
 	"os"
 
 	configv1alpha1 "github.com/eddycharly/kloops/api/v1alpha1"
-	"github.com/eddycharly/kloops/controllers"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/pluginimports"
 	"github.com/eddycharly/kloops/pkg/chatbot/server"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -44,8 +43,10 @@ func init() {
 }
 
 func main() {
+	var namespace string
 	var metricsAddr string
 	var enableLeaderElection bool
+	flag.StringVar(&namespace, "namespace", "default", "The namespace to watch.")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.Parse()
@@ -54,6 +55,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
+		Namespace:          namespace,
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
 		LeaderElection:     enableLeaderElection,
@@ -64,14 +66,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.RepoConfigReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("RepoConfig"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "RepoConfig")
-		os.Exit(1)
-	}
+	// if err = (&controllers.RepoConfigReconciler{
+	// 	Client: mgr.GetClient(),
+	// 	Log:    ctrl.Log.WithName("controllers").WithName("RepoConfig"),
+	// 	Scheme: mgr.GetScheme(),
+	// }).SetupWithManager(mgr); err != nil {
+	// 	setupLog.Error(err, "unable to create controller", "controller", "RepoConfig")
+	// 	os.Exit(1)
+	// }
 	// +kubebuilder:scaffold:builder
 	stopCh := ctrl.SetupSignalHandler()
 

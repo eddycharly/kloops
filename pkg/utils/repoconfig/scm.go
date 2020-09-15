@@ -27,6 +27,22 @@ func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, st
 				return string(hmac), nil
 			},
 			nil
+	} else if repoConfig.Spec.Gitea != nil {
+		token, err := getSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.Token)
+		if err != nil {
+			return "", "", "", nil, errors.New("failed to read token")
+		}
+		return "gitea",
+			repoConfig.Spec.Gitea.ServerURL,
+			string(token),
+			func(scm.Webhook) (string, error) {
+				hmac, err := getSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.HmacToken)
+				if err != nil {
+					return "", err
+				}
+				return string(hmac), nil
+			},
+			nil
 	}
 	return "", "", "", nil, errors.New("failed to deduce scm infos from repo config")
 }

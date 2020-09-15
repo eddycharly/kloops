@@ -19,8 +19,8 @@ spec:
         - name: chatbot
           image: {{ .Values.chatbot.image.repository }}:{{ .Values.chatbot.image.tag }}
           imagePullPolicy: {{ .Values.chatbot.image.pullPolicy }}
-          # args:
-          #   - --namespace={{ .Release.Namespace }}
+          args:
+            - --namespace={{ .Release.Namespace }}
           ports:
             - containerPort: {{ .Values.chatbot.service.internalPort }}
           resources:

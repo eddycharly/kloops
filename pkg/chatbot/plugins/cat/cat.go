@@ -63,6 +63,7 @@ func configHelp(config *v1alpha1.PluginConfigSpec) (map[string]string, error) {
 func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plugins.GenericCommentEvent) error {
 	logger := request.Logger()
 	scmClient := request.ScmClient()
+	logger.Info("handle generic comment")
 	// Fetch image
 	image, err := fetchImage(scmClient.Tools, match.Arg, match.Name == "meowvie", getKey(request)())
 	if err != nil {
@@ -75,8 +76,12 @@ func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plu
 		logger.Error(err, "Failed to format response")
 		return err
 	}
-	// TODO issues or pr
-	return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
+	logger.Info(rspn)
+	if event.IsPR {
+		return scmClient.PullRequests.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
+	} else {
+		return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
+	}
 }
 
 func getKey(request plugins.PluginRequest) func() string {

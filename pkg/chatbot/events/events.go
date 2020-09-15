@@ -89,6 +89,7 @@ func (e *events) getPlugins(repoConfig *v1alpha1.RepoConfig) map[string]*plugins
 }
 
 func (e *events) handleIssueComment(repoConfig *v1alpha1.RepoConfig, pluginConfig *v1alpha1.PluginConfigSpec, scmClient *scm.Client, event *scm.IssueCommentHook) {
+	e.logger.Info("handle issue comment")
 	e.handleGenericComment(repoConfig, pluginConfig, scmClient,
 		plugins.GenericCommentEvent{
 			GUID:        strconv.Itoa(event.Comment.ID),
@@ -109,6 +110,7 @@ func (e *events) handleIssueComment(repoConfig *v1alpha1.RepoConfig, pluginConfi
 }
 
 func (e *events) handlePullRequestComment(repoConfig *v1alpha1.RepoConfig, pluginConfig *v1alpha1.PluginConfigSpec, scmClient *scm.Client, event *scm.PullRequestCommentHook) {
+	e.logger.Info("handle pull request comment")
 	e.handleGenericComment(repoConfig, pluginConfig, scmClient,
 		plugins.GenericCommentEvent{
 			GUID:        strconv.Itoa(event.Comment.ID),
@@ -129,6 +131,7 @@ func (e *events) handlePullRequestComment(repoConfig *v1alpha1.RepoConfig, plugi
 }
 
 func (e *events) handleGenericComment(repoConfig *v1alpha1.RepoConfig, pluginConfig *v1alpha1.PluginConfigSpec, scmClient *scm.Client, event plugins.GenericCommentEvent) {
+	e.logger.Info("handle generic comment")
 	for name, plugin := range e.getPlugins(repoConfig) {
 		if plugin.GenericCommentHandler != nil {
 			if err := plugin.GenericCommentHandler(e.makePluginRequest(repoConfig, pluginConfig, scmClient, name), event); err != nil {
