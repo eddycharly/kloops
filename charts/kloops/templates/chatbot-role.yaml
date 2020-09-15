@@ -16,21 +16,12 @@ rules:
   - list
   - watch
 - apiGroups:
-  - lighthouse.jenkins.io
+  - config.kloops.io
   resources:
-  - lighthousejobs
-  verbs:
-  - create
-  - delete
-  - list
-  - update
-  - get
-  - watch
-  - patch
-- apiGroups:
-  - lighthouse.jenkins.io
-  resources:
-  - lighthousejobs/status
+  - repoconfigs
+  - repoconfigs/status
+  - pluginconfigs
+  - pluginconfigs/status
   verbs:
   - create
   - delete
