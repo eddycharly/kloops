@@ -64,7 +64,7 @@ func formatURLAndSendResponse(request plugins.PluginRequest, event plugins.Gener
 	if err != nil {
 		return err
 	}
-	return sendResponse(request, event, msg)
+	return sendResponse(request.ScmClient(), event, msg)
 }
 
 func handle(_ plugins.CommandMatch, request plugins.PluginRequest, event plugins.GenericCommentEvent) error {
@@ -82,11 +82,7 @@ func handle(_ plugins.CommandMatch, request plugins.PluginRequest, event plugins
 		return err
 	}
 	// Create comment
-	if event.IsPR {
-		return scmClient.PullRequests.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
-	} else {
-		return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
-	}
+	return sendResponse(scmClient, event, rspn)
 }
 
 func fetchImage(scmTools scmprovider.Tools) (string, error) {
@@ -110,11 +106,9 @@ func formatResponse(image string) (string, error) {
 	return fmt.Sprintf("![dog image](%s)", img), nil
 }
 
-func sendResponse(request plugins.PluginRequest, event plugins.GenericCommentEvent, msg string) error {
-	scmClient := request.ScmClient()
+func sendResponse(scmClient scmprovider.Client, event plugins.GenericCommentEvent, msg string) error {
 	if event.IsPR {
 		return scmClient.PullRequests.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, msg))
-	} else {
-		return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, msg))
 	}
+	return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, msg))
 }

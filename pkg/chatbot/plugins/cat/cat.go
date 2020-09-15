@@ -67,11 +67,11 @@ func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plu
 		logger.Error(err, "Failed to format response")
 		return err
 	}
+	// Create comment
 	if event.IsPR {
 		return scmClient.PullRequests.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
-	} else {
-		return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
 	}
+	return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
 }
 
 func getKey(request plugins.PluginRequest) func() string {
