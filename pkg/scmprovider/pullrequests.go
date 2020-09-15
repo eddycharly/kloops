@@ -31,13 +31,35 @@ func (s PullRequests) CreateComment(repo string, number int, comment string) err
 }
 
 func (s PullRequests) AddLabel(repo string, number int, label string) error {
-	return nil
+	ctx := context.Background()
+	_, err := s.client.AddLabel(ctx, repo, number, label)
+	return err
 }
 
 func (s PullRequests) RemoveLabel(repo string, number int, label string) error {
-	return nil
+	ctx := context.Background()
+	_, err := s.client.DeleteLabel(ctx, repo, number, label)
+	return err
 }
 
 func (s PullRequests) GetLabels(repo string, number int) ([]*scm.Label, error) {
-	return nil, nil
+	ctx := context.Background()
+	var allLabels []*scm.Label
+	var resp *scm.Response
+	var labels []*scm.Label
+	var err error
+	firstRun := false
+	opts := scm.ListOptions{
+		Page: 1,
+	}
+	for !firstRun || (resp != nil && opts.Page <= resp.Page.Last) {
+		labels, resp, err = s.client.ListLabels(ctx, repo, number, opts)
+		if err != nil {
+			return nil, err
+		}
+		firstRun = true
+		allLabels = append(allLabels, labels...)
+		opts.Page++
+	}
+	return labels, err
 }

@@ -39,8 +39,8 @@ func (e *events) ProcessWebHook(repoConfig *v1alpha1.RepoConfig, pluginConfig *v
 		// o.server.HandlePushEvent(l, pushHook)
 		return "processed push hook", nil
 	}
-	if _, ok := event.(*scm.PullRequestHook); ok {
-		// o.server.HandlePullRequestEvent(l, prHook)
+	if event, ok := event.(*scm.PullRequestHook); ok {
+		e.handlePullRequest(repoConfig, pluginConfig, scmClient, event)
 		return "processed PR hook", nil
 	}
 	if _, ok := event.(*scm.BranchHook); ok {
@@ -130,6 +130,17 @@ func (e *events) handlePullRequestComment(repoConfig *v1alpha1.RepoConfig, plugi
 	)
 }
 
+func (e *events) handlePullRequest(repoConfig *v1alpha1.RepoConfig, pluginConfig *v1alpha1.PluginConfigSpec, scmClient *scm.Client, event *scm.PullRequestHook) {
+	e.logger.Info("handle pull requesr")
+	for name, plugin := range e.getPlugins(repoConfig) {
+		if plugin.PullRequestHandler != nil {
+			if err := plugin.PullRequestHandler(e.makePluginRequest(repoConfig, pluginConfig, scmClient, name), *event); err != nil {
+				e.logger.Error(err, "failed to process event")
+			}
+		}
+	}
+}
+
 func (e *events) handleGenericComment(repoConfig *v1alpha1.RepoConfig, pluginConfig *v1alpha1.PluginConfigSpec, scmClient *scm.Client, event plugins.GenericCommentEvent) {
 	e.logger.Info("handle generic comment")
 	for name, plugin := range e.getPlugins(repoConfig) {
@@ -147,168 +158,3 @@ func (e *events) handleGenericComment(repoConfig *v1alpha1.RepoConfig, pluginCon
 		}
 	}
 }
-
-// // handlePushEvent handles a push event
-// func (s *Server) handlePushEvent(l *logrus.Entry, pe *scm.PushHook) {
-// 	repo := pe.Repository()
-// 	l = l.WithFields(logrus.Fields{
-// 		scmprovider.OrgLogField:  repo.Namespace,
-// 		scmprovider.RepoLogField: repo.Name,
-// 		"ref":                    pe.Ref,
-// 		"head":                   pe.After,
-// 	})
-// 	l.Info("Push event.")
-// 	c := 0
-// 	for p, h := range s.getPlugins(pe.Repo.Namespace, pe.Repo.Name) {
-// 		if h.PushEventHandler != nil {
-// 			s.wg.Add(1)
-// 			c++
-// 			go func(p string, h plugins.PushEventHandler) {
-// 				defer s.wg.Done()
-// 				agent := plugins.NewAgent(s.ConfigAgent, s.Plugins, s.ClientAgent, s.ServerURL, l.WithField("plugin", p))
-// 				if err := h(agent, *pe); err != nil {
-// 					agent.Logger.WithError(err).Error("Error handling PushEvent.")
-// 				}
-// 			}(p, h.PushEventHandler)
-// 		}
-// 	}
-// 	l.WithField("count", strconv.Itoa(c)).Info("number of push handlers")
-// }
-
-// func (s *Server) handlePullRequestEvent(l *logrus.Entry, pr *scm.PullRequestHook) {
-// 	l = l.WithFields(logrus.Fields{
-// 		scmprovider.OrgLogField:  pr.Repo.Namespace,
-// 		scmprovider.RepoLogField: pr.Repo.Name,
-// 		scmprovider.PrLogField:   pr.PullRequest.Number,
-// 		"author":                 pr.PullRequest.Author.Login,
-// 		"url":                    pr.PullRequest.Link,
-// 	})
-// 	action := pr.Action
-// 	l.Infof("Pull request %s.", action)
-// 	c := 0
-// 	repo := pr.PullRequest.Base.Repo
-// 	if repo.Name == "" {
-// 		repo = pr.Repo
-// 	}
-// 	for p, h := range s.getPlugins(repo.Namespace, repo.Name) {
-// 		if h.PullRequestHandler != nil {
-// 			s.wg.Add(1)
-// 			c++
-// 			go func(p string, h plugins.PullRequestHandler) {
-// 				defer s.wg.Done()
-// 				agent := plugins.NewAgent(s.ConfigAgent, s.Plugins, s.ClientAgent, s.ServerURL, l.WithField("plugin", p))
-// 				agent.InitializeCommentPruner(
-// 					pr.Repo.Namespace,
-// 					pr.Repo.Name,
-// 					pr.PullRequest.Number,
-// 				)
-// 				if err := h(agent, *pr); err != nil {
-// 					agent.Logger.WithError(err).Error("Error handling PullRequestEvent.")
-// 				}
-// 			}(p, h.PullRequestHandler)
-// 		}
-// 	}
-// 	l.WithField("count", strconv.Itoa(c)).Info("number of PR handlers")
-
-// 	if !actionRelatesToPullRequestComment(action, l) {
-// 		return
-// 	}
-// 	s.handleGenericComment(
-// 		l,
-// 		&scmprovider.GenericCommentEvent{
-// 			GUID:        pr.GUID,
-// 			IsPR:        true,
-// 			Action:      action,
-// 			Body:        pr.PullRequest.Body,
-// 			Link:        pr.PullRequest.Link,
-// 			Number:      pr.PullRequest.Number,
-// 			Repo:        pr.Repo,
-// 			Author:      pr.PullRequest.Author,
-// 			IssueAuthor: pr.PullRequest.Author,
-// 			Assignees:   pr.PullRequest.Assignees,
-// 			IssueState:  pr.PullRequest.State,
-// 			IssueBody:   pr.PullRequest.Body,
-// 			IssueLink:   pr.PullRequest.Link,
-// 		},
-// 	)
-// }
-
-// // handleBranchEvent handles a branch event
-// func (s *Server) handleBranchEvent(entry *logrus.Entry, hook *scm.BranchHook) {
-// 	// TODO
-// }
-
-// // handleReviewEvent handles a PR review event
-// func (s *Server) handleReviewEvent(l *logrus.Entry, re scm.ReviewHook) {
-// 	l = l.WithFields(logrus.Fields{
-// 		scmprovider.OrgLogField:  re.Repo.Namespace,
-// 		scmprovider.RepoLogField: re.Repo.Name,
-// 		scmprovider.PrLogField:   re.PullRequest.Number,
-// 		"review":                 re.Review.ID,
-// 		"reviewer":               re.Review.Author.Login,
-// 		"url":                    re.Review.Link,
-// 	})
-// 	l.Infof("Review %s.", re.Action)
-// 	for p, h := range s.getPlugins(re.PullRequest.Base.Repo.Namespace, re.PullRequest.Base.Repo.Name) {
-// 		if h.ReviewEventHandler != nil {
-// 			s.wg.Add(1)
-// 			go func(p string, h plugins.ReviewEventHandler) {
-// 				defer s.wg.Done()
-// 				agent := plugins.NewAgent(s.ConfigAgent, s.Plugins, s.ClientAgent, s.ServerURL, l.WithField("plugin", p))
-// 				agent.InitializeCommentPruner(
-// 					re.Repo.Namespace,
-// 					re.Repo.Name,
-// 					re.PullRequest.Number,
-// 				)
-// 				if err := h(agent, re); err != nil {
-// 					agent.Logger.WithError(err).Error("Error handling ReviewEvent.")
-// 				}
-// 			}(p, h.ReviewEventHandler)
-// 		}
-// 	}
-// 	action := re.Action
-// 	if !actionRelatesToPullRequestComment(action, l) {
-// 		return
-// 	}
-// 	s.handleGenericComment(
-// 		l,
-// 		&scmprovider.GenericCommentEvent{
-// 			GUID:        re.GUID,
-// 			IsPR:        true,
-// 			Action:      action,
-// 			Body:        re.Review.Body,
-// 			Link:        re.Review.Link,
-// 			Number:      re.PullRequest.Number,
-// 			Repo:        re.Repo,
-// 			Author:      re.Review.Author,
-// 			IssueAuthor: re.PullRequest.Author,
-// 			Assignees:   re.PullRequest.Assignees,
-// 			IssueState:  re.PullRequest.State,
-// 			IssueBody:   re.PullRequest.Body,
-// 			IssueLink:   re.PullRequest.Link,
-// 		},
-// 	)
-// }
-
-// func actionRelatesToPullRequestComment(action scm.Action, l *logrus.Entry) bool {
-// 	switch action {
-
-// 	case scm.ActionCreate, scm.ActionOpen, scm.ActionSubmitted, scm.ActionEdited, scm.ActionDelete, scm.ActionDismissed, scm.ActionUpdate:
-// 		return true
-
-// 	case scm.ActionAssigned,
-// 		scm.ActionUnassigned,
-// 		scm.ActionReviewRequested,
-// 		scm.ActionReviewRequestRemoved,
-// 		scm.ActionLabel,
-// 		scm.ActionUnlabel,
-// 		scm.ActionClose,
-// 		scm.ActionReopen,
-// 		scm.ActionSync:
-// 		return false
-
-// 	default:
-// 		l.Errorf(failedCommentCoerceFmt, "pull_request", action.String())
-// 		return false
-// 	}
-// }

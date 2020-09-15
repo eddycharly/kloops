@@ -6,6 +6,7 @@ type Client struct {
 	client       *scm.Client
 	Issues       Issues
 	PullRequests PullRequests
+	Git          Git
 	Tools        Tools
 }
 
@@ -18,13 +19,11 @@ func NewClient(client *scm.Client) Client {
 		PullRequests: PullRequests{
 			client: client.PullRequests,
 		},
+		Git: Git{
+			client: client.Git,
+		},
 		Tools: Tools{
 			client: client,
 		},
 	}
-}
-
-func (client Client) DeleteRef(string, string) error {
-	// TODO
-	return nil
 }

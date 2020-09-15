@@ -32,7 +32,7 @@ func handlePullRequest(request plugins.PluginRequest, event scm.PullRequestHook)
 		return nil
 	}
 	// Delete branch
-	if err := request.ScmClient().DeleteRef(pr.Base.Repo.FullName, fmt.Sprintf("heads/%s", pr.Head.Ref)); err != nil {
+	if err := request.ScmClient().Git.DeleteRef(pr.Base.Repo.FullName, fmt.Sprintf("heads/%s", pr.Head.Ref)); err != nil {
 		return fmt.Errorf("failed to delete branch %s on repo %s after Pull Request #%d got merged: %v", pr.Head.Ref, pr.Base.Repo.FullName, event.PullRequest.Number, err)
 	}
 	return nil
