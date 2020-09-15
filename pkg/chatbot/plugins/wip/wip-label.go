@@ -21,86 +21,75 @@ limitations under the License.
 // with the prefix.
 package wip
 
-import (
-	"fmt"
-	"regexp"
+// const (
+// 	// PluginName defines this plugin's registered name.
+// 	pluginName = "wip"
+// 	label      = "do-not-merge/work-in-progress"
+// )
 
-	"github.com/eddycharly/kloops/api/v1alpha1"
-	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
-	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
-	"github.com/go-logr/logr"
-	"github.com/jenkins-x/go-scm/scm"
-)
+// var (
+// 	titleRegex = regexp.MustCompile(`(?i)^\W?WIP\W`)
+// )
 
-const (
-	// PluginName defines this plugin's registered name.
-	pluginName = "wip"
-	label      = "do-not-merge/work-in-progress"
-)
+// func init() {
+// 	plugins.RegisterHelpProvider(pluginName, helpProvider)
+// 	plugins.RegisterPullRequestHandler(pluginName, handlePullRequest)
+// }
 
-var (
-	titleRegex = regexp.MustCompile(`(?i)^\W?WIP\W`)
-)
+// func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, error) {
+// 	// Only the Description field is specified because this plugin is not triggered with commands and is not configurable.
+// 	return &pluginhelp.PluginHelp{
+// 			Description: "The wip (Work In Progress) plugin applies the '" + label + "' Label to pull requests whose title starts with 'WIP' or are in the 'draft' stage, and removes it from pull requests when they remove the title prefix or become ready for review. The '" + label + "' Label is typically used to block a pull request from merging while it is still in progress.",
+// 		},
+// 		nil
+// }
 
-func init() {
-	plugins.RegisterHelpProvider(pluginName, helpProvider)
-	plugins.RegisterPullRequestHandler(pluginName, handlePullRequest)
-}
+// // Strict subset of SCM.Client methods.
+// type scmClient interface {
+// 	AddLabel(string, int, string) error
+// 	RemoveLabel(string, int, string) error
+// 	GetLabels(string, int) ([]*scm.Label, error)
+// }
 
-func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, error) {
-	// Only the Description field is specified because this plugin is not triggered with commands and is not configurable.
-	return &pluginhelp.PluginHelp{
-			Description: "The wip (Work In Progress) plugin applies the '" + label + "' Label to pull requests whose title starts with 'WIP' or are in the 'draft' stage, and removes it from pull requests when they remove the title prefix or become ready for review. The '" + label + "' Label is typically used to block a pull request from merging while it is still in progress.",
-		},
-		nil
-}
+// func handlePullRequest(request plugins.PluginRequest, event *scm.PullRequestHook) error {
+// 	logger := request.Logger()
+// 	scmClient := request.ScmClient()
+// 	return handle(scmClient.PullRequests, logger, event.Repository(), event.Action, event.PullRequest)
+// }
 
-// Strict subset of SCM.Client methods.
-type scmClient interface {
-	AddLabel(string, int, string) error
-	RemoveLabel(string, int, string) error
-	GetLabels(string, int) ([]*scm.Label, error)
-}
+// func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, pr scm.PullRequest) error {
+// 	// These are the only actions indicating the PR title may have changed.
+// 	if action != scm.ActionOpen &&
+// 		action != scm.ActionReopen &&
+// 		action != scm.ActionEdited &&
+// 		action != scm.ActionUpdate &&
+// 		action != scm.ActionReadyForReview {
+// 		return nil
+// 	}
 
-func handlePullRequest(request plugins.PluginRequest, event *scm.PullRequestHook) error {
-	logger := request.Logger()
-	scmClient := request.ScmClient()
-	return handle(scmClient.PullRequests, logger, event.Repository(), event.Action, event.PullRequest)
-}
+// 	currentLabels, err := client.GetLabels(repo.FullName, pr.Number)
+// 	if err != nil {
+// 		return fmt.Errorf("could not get labels for PR %s:%d in WIP plugin: %v", repo.FullName, pr.Number, err)
+// 	}
+// 	hasLabel := false
+// 	for _, l := range currentLabels {
+// 		if l.Name == label {
+// 			hasLabel = true
+// 		}
+// 	}
 
-func handle(client scmClient, logger logr.Logger, repo scm.Repository, action scm.Action, pr scm.PullRequest) error {
-	// These are the only actions indicating the PR title may have changed.
-	if action != scm.ActionOpen &&
-		action != scm.ActionReopen &&
-		action != scm.ActionEdited &&
-		action != scm.ActionUpdate &&
-		action != scm.ActionReadyForReview {
-		return nil
-	}
+// 	needsLabel := pr.Draft || titleRegex.MatchString(pr.Title)
 
-	currentLabels, err := client.GetLabels(repo.FullName, pr.Number)
-	if err != nil {
-		return fmt.Errorf("could not get labels for PR %s:%d in WIP plugin: %v", repo.FullName, pr.Number, err)
-	}
-	hasLabel := false
-	for _, l := range currentLabels {
-		if l.Name == label {
-			hasLabel = true
-		}
-	}
-
-	needsLabel := pr.Draft || titleRegex.MatchString(pr.Title)
-
-	if needsLabel && !hasLabel {
-		if err := client.AddLabel(repo.FullName, pr.Number, label); err != nil {
-			logger.Error(err, "error while adding label")
-			return err
-		}
-	} else if !needsLabel && hasLabel {
-		if err := client.RemoveLabel(repo.FullName, pr.Number, label); err != nil {
-			logger.Error(err, "error while removing label")
-			return err
-		}
-	}
-	return nil
-}
+// 	if needsLabel && !hasLabel {
+// 		if err := client.AddLabel(repo.FullName, pr.Number, label); err != nil {
+// 			logger.Error(err, "error while adding label")
+// 			return err
+// 		}
+// 	} else if !needsLabel && hasLabel {
+// 		if err := client.RemoveLabel(repo.FullName, pr.Number, label); err != nil {
+// 			logger.Error(err, "error while removing label")
+// 			return err
+// 		}
+// 	}
+// 	return nil
+// }

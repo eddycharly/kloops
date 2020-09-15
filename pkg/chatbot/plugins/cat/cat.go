@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
-	"strings"
 
 	"github.com/eddycharly/kloops/api/v1alpha1"
-	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 	"github.com/eddycharly/kloops/pkg/clients/thecatapi"
 	"github.com/eddycharly/kloops/pkg/utils"
-	"github.com/go-logr/logr"
 	"github.com/jenkins-x/go-scm/scm"
 )
 
@@ -25,65 +22,49 @@ type scmTools interface {
 	QuoteAuthorForComment(string) string
 }
 
+var (
+	grumpyKeywords = regexp.MustCompile(`(?mi)^(no|grumpy)\s*$`)
+)
+
 const (
 	pluginName = "cat"
 	grumpyURL  = "https://upload.wikimedia.org/wikipedia/commons/e/ee/Grumpy_Cat_by_Gage_Skidmore.jpg"
 )
 
 var (
-	match          = regexp.MustCompile(`(?mi)^/(?:lh-)?meow(vie)?(?: (.+))?\s*$`)
-	grumpyKeywords = regexp.MustCompile(`(?mi)^(no|grumpy)\s*$`)
+	plugin = plugins.Plugin{
+		Description:        "The cat plugin adds a cat image to an issue or PR in response to the `/meow` command.",
+		ConfigHelpProvider: configHelp,
+		Commands: []plugins.Command{{
+			Name: "meow|meowvie",
+			Arg: &plugins.CommandArg{
+				Pattern:  `.+`,
+				Optional: true,
+			},
+			Description: "Add a cat image to the issue or PR",
+			Action: plugins.
+				Invoke(handle).
+				When(plugins.Action(scm.ActionCreate)),
+		}},
+	}
 )
 
 func init() {
-	plugins.RegisterHelpProvider(pluginName, helpProvider)
-	plugins.RegisterIssueCommentHandler(pluginName, handleIssueComment)
-	plugins.RegisterPullRequestCommentHandler(pluginName, handlePullRequestComment)
+	plugins.RegisterPlugin(pluginName, plugin)
 }
 
-func helpProvider(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, error) {
-	pluginHelp := &pluginhelp.PluginHelp{
-		Description: "The cat plugin adds a cat image to an issue or PR in response to the `/meow` command.",
-		Config: map[string]string{
-			"": "The cat plugin uses an api key for thecatapi.com stored in the plugin config.",
+func configHelp(config *v1alpha1.PluginConfigSpec) (map[string]string, error) {
+	return map[string]string{
+			"": fmt.Sprintf("The cat plugin uses an api key for thecatapi.com."),
 		},
-	}
-	pluginHelp.AddCommand(pluginhelp.Command{
-		Usage:       "/meow(vie) [CATegory]",
-		Description: "Add a cat image to the issue or PR",
-		Featured:    false,
-		WhoCanUse:   "Anyone",
-		Examples:    []string{"/meow", "/meow caturday", "/meowvie clothes", "/lh-meow"},
-	})
-	return pluginHelp, nil
+		nil
 }
 
-func handleIssueComment(request plugins.PluginRequest, event *scm.IssueCommentHook) error {
+func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plugins.GenericCommentEvent) error {
+	logger := request.Logger()
 	scmClient := request.ScmClient()
-	return handle(scmClient.Issues, scmClient.Tools, request.Logger(), event.Repo, event.Action, event.Comment, event.Issue.Number, getKey(request))
-}
-
-func handlePullRequestComment(request plugins.PluginRequest, event *scm.PullRequestCommentHook) error {
-	scmClient := request.ScmClient()
-	return handle(scmClient.PullRequests, scmClient.Tools, request.Logger(), event.Repository(), event.Action, event.Comment, event.PullRequest.Number, getKey(request))
-}
-
-func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Repository, action scm.Action, comment scm.Comment, number int, getKey func() string) error {
-	// Only consider new comments.
-	if action != scm.ActionCreate {
-		return nil
-	}
-	// Make sure they are requesting a cat
-	mat := match.FindStringSubmatch(comment.Body)
-	if mat == nil {
-		return nil
-	}
-	category, movieCat, err := parseMatch(mat)
-	if err != nil {
-		return err
-	}
 	// Fetch image
-	image, err := fetchImage(scmTools, category, movieCat, getKey())
+	image, err := fetchImage(scmClient.Tools, match.Arg, match.Name == "meowvie", getKey(request)())
 	if err != nil {
 		logger.Error(err, "Failed to get cat img")
 		return err
@@ -94,17 +75,8 @@ func handle(client scmClient, scmTools scmTools, logger logr.Logger, repo scm.Re
 		logger.Error(err, "Failed to format response")
 		return err
 	}
-	return client.CreateComment(repo.FullName, number, plugins.FormatCommentResponse(scmTools, comment, rspn))
-}
-
-func parseMatch(mat []string) (string, bool, error) {
-	if len(mat) != 3 {
-		err := fmt.Errorf("expected 3 capture groups in regexp match, but got %d", len(mat))
-		return "", false, err
-	}
-	category := strings.TrimSpace(mat[2])
-	movieCat := len(mat[1]) > 0 // "vie" suffix is present.
-	return category, movieCat, nil
+	// TODO issues or pr
+	return scmClient.Issues.CreateComment(event.Repo.FullName, event.Number, plugins.FormatResponseRaw(scmClient.Tools, event.Body, event.Link, event.Author.Login, rspn))
 }
 
 func getKey(request plugins.PluginRequest) func() string {
