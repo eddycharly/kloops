@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/go-logr/logr v0.1.0
 	github.com/gorilla/mux v1.8.0
-	github.com/jenkins-x/go-scm v1.5.159
+	github.com/jenkins-x/go-scm v1.5.165
 	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
