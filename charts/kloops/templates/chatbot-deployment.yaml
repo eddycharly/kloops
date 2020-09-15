@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "chatbot.name" . }}
+  labels:
+    app: {{ template "chatbot.name" . }}
+spec:
+  replicas: {{ .Values.chatbot.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "chatbot.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "chatbot.name" . }}
+    spec:
+      serviceAccountName: {{ template "chatbot.name" . }}
+      containers:
+        - name: chatbot
+          image: {{ .Values.chatbot.image.repository }}:{{ .Values.chatbot.image.tag }}
+          imagePullPolicy: {{ .Values.chatbot.image.pullPolicy }}
+          # args:
+          #   - --namespace={{ .Release.Namespace }}
+          ports:
+            - containerPort: {{ .Values.chatbot.service.internalPort }}
+          resources:
+            {{- toYaml .Values.chatbot.resources | nindent 12 }}

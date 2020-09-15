@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "chatbot.name" . }}
+  annotations:
+    {{- toYaml .Values.chatbot.service.annotations | nindent 4 }}
+spec:
+  type: {{ .Values.chatbot.service.type }}
+  ports:
+  - port: {{ .Values.chatbot.service.externalPort }}
+    targetPort: {{ .Values.chatbot.service.internalPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app: {{ template "chatbot.name" . }}

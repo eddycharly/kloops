@@ -1,0 +1,32 @@
+# logFormat -- Log format
+logFormat: "json"
+
+cluster:
+  crds:
+    # cluster.crds.create -- Create custom resource definitions
+    create: true
+
+chatbot:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: eddycharly/kloops
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 8080
+    annotations: {}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 80m
+      memory: 128Mi
+
+  ingress:
+    enabled: false
+    annotations: {}
+    hosts: []

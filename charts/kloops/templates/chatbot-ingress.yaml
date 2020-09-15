@@ -1,0 +1,18 @@
+{{- if .Values.chatbot.ingress.enabled }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "chatbot.name" . }}
+  annotations:
+    {{- toYaml .Values.chatbot.ingress.annotations | nindent 4 }}
+spec:
+  rules:
+  {{- range .Values.chatbot.ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - backend:
+              serviceName: {{ default (include "chatbot.name" $) $.Values.chatbot.serviceName }}
+              servicePort: {{ $.Values.chatbot.service.externalPort }}
+  {{- end }}
+{{- end }}

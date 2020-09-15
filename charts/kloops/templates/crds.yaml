@@ -1,0 +1,4 @@
+{{- if .Values.cluster.crds.create }}
+{{ .Files.Get "config/config.kloops.io_pluginconfigs.yaml" }}
+{{ .Files.Get "config/config.kloops.io_repoconfigs.yaml" }}
+{{- end -}}
