@@ -23,3 +23,8 @@ func NewClient(client *scm.Client) Client {
 		},
 	}
 }
+
+func (client Client) DeleteRef(string, string) error {
+	// TODO
+	return nil
+}

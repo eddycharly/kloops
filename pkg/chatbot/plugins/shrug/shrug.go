@@ -6,7 +6,6 @@ import (
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 	"github.com/eddycharly/kloops/pkg/scmprovider"
 	"github.com/jenkins-x/go-scm/scm"
-	"k8s.io/test-infra/prow/labels"
 )
 
 const (
@@ -16,11 +15,11 @@ const (
 
 var (
 	plugin = plugins.Plugin{
-		Description: labels.Shrug,
+		Description: label,
 		Commands: []plugins.Command{{
 			Prefix:      "un",
 			Name:        "shrug",
-			Description: "Adds or removes the " + labels.Shrug + " label",
+			Description: "Adds or removes the " + label + " label",
 			Action: plugins.
 				Invoke(shrug).
 				When(plugins.Action(scm.ActionCreate)),
@@ -65,9 +64,9 @@ func addLabel(scmClient scmprovider.Client, event plugins.GenericCommentEvent) e
 		return err
 	}
 	if event.IsPR {
-		return scmClient.PullRequests.AddLabel(event.Repo.FullName, event.Number, labels.Shrug)
+		return scmClient.PullRequests.AddLabel(event.Repo.FullName, event.Number, label)
 	}
-	return scmClient.Issues.AddLabel(event.Repo.FullName, event.Number, labels.Shrug)
+	return scmClient.Issues.AddLabel(event.Repo.FullName, event.Number, label)
 }
 
 func removeLabel(scmClient scmprovider.Client, event plugins.GenericCommentEvent) error {
@@ -85,7 +84,7 @@ func removeLabel(scmClient scmprovider.Client, event plugins.GenericCommentEvent
 		return fmt.Errorf("failed to comment on %s#%d: %v", event.Repo.FullName, event.Number, err)
 	}
 	if event.IsPR {
-		return scmClient.PullRequests.RemoveLabel(event.Repo.FullName, event.Number, labels.Shrug)
+		return scmClient.PullRequests.RemoveLabel(event.Repo.FullName, event.Number, label)
 	}
-	return scmClient.Issues.RemoveLabel(event.Repo.FullName, event.Number, labels.Shrug)
+	return scmClient.Issues.RemoveLabel(event.Repo.FullName, event.Number, label)
 }
