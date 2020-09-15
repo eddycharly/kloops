@@ -52,6 +52,20 @@ type GitHubRepo struct {
 	Token Secret `json:"token"`
 }
 
+// GiteaRepo defines a Gitea repository
+type GiteaRepo struct {
+	// Owner is the repository owner name
+	Owner string `json:"owner"`
+	// Repo is the repository owner name
+	Repo string `json:"repo"`
+	// ServerURL is the GitHub server url
+	ServerURL string `json:"server,omitempty"`
+	// HmacToken is the secret used to validate webhooks
+	HmacToken Secret `json:"hmacToken"`
+	// Token is the token used to interact with the git repository
+	Token Secret `json:"token"`
+}
+
 // RepoPluginConfig defines a PluginConfig (it can be a ref or an inline spec)
 type RepoPluginConfig struct {
 	Ref     string            `json:"ref,omitempty"`
@@ -65,6 +79,8 @@ type RepoConfigSpec struct {
 	BotName string `json:"botName,omitempty"`
 	// GitHub defines the GitHub repository details
 	GitHub *GitHubRepo `json:"gitHub,omitempty"`
+	// Gitea defines the Gitea repository details
+	Gitea *GiteaRepo `json:"gitea,omitempty"`
 	// AutoMerge configuration for the repository
 	AutoMerge *AutoMerge `json:"autoMerge,omitempty"`
 	// PluginConfig defines the plugin configuration for the repository
