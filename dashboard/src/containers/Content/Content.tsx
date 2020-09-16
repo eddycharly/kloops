@@ -5,7 +5,8 @@ import {
   Toolbar
 } from '@material-ui/core';
 import {
-  Plugins
+  Plugins,
+  RepoConfigs
 } from '..';
 
 const useStyles = makeStyles((theme) => ({
@@ -29,12 +30,7 @@ function Content() {
       <Toolbar />
       <Switch>
         <Route path="/help/plugins" exact component={Plugins} />
-        {/* <Route path="/actions" exact component={Actions} />
-        <Route path="/actions/:actionId" component={Action} />
-        <Route path="/activity" exact component={Activity} />
-        <Route path="/tenants" exact component={Tenants} />
-        <Route path="/tenants/:tenantName" component={Tenant} />
-        <Route path="/history" component={History} /> */}
+        <Route path="/config/repositories" exact component={RepoConfigs} />
       </Switch>
     </main>
   );

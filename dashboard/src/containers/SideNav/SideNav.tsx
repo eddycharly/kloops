@@ -44,7 +44,9 @@ function SideNav(props: any) {
   return (
     <Drawer
       className={classes.drawer}
-      // variant="permanent"
+      variant="temporary"
+      onEscapeKeyDown={props.handleDrawerClose}
+      onBackdropClick={props.handleDrawerClose}
       open={props.open}
       classes={{
         paper: classes.drawerPaper,
@@ -60,28 +62,28 @@ function SideNav(props: any) {
         <List>
           <ListSubheader>Configuration</ListSubheader>
           <Divider />
-          <ListItem button component={Link} to="/config/kloops">
+          <ListItem button component={Link} to="/config/kloops" onClick={props.handleDrawerClose}>
             <ListItemText primary="Kloops" />
           </ListItem>
-          <ListItem button component={Link} to="/config/repositories">
+          <ListItem button component={Link} to="/config/repositories" onClick={props.handleDrawerClose}>
             <ListItemText primary="Repositories" />
           </ListItem>
-          <ListItem button component={Link} to="/config/plugins">
+          <ListItem button component={Link} to="/config/plugins" onClick={props.handleDrawerClose}>
             <ListItemText primary="Plugins" />
           </ListItem>
           <Divider />
           <ListSubheader>Jobs</ListSubheader>
           <Divider />
-          <ListItem button component={Link} to="/help/plugins">
+          <ListItem button component={Link} to="/help/plugins" onClick={props.handleDrawerClose}>
             <ListItemText primary="Jobs" />
           </ListItem>
           <Divider />
           <ListSubheader>Help</ListSubheader>
           <Divider />
-          <ListItem button component={Link} to="/help/plugins">
+          <ListItem button component={Link} to="/help/plugins" onClick={props.handleDrawerClose}>
             <ListItemText primary="Plugins" />
           </ListItem>
-          <ListItem button component={Link} to="/help/about">
+          <ListItem button component={Link} to="/help/about" onClick={props.handleDrawerClose}>
             <ListItemText primary="About" />
           </ListItem>
         </List>
