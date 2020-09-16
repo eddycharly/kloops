@@ -131,7 +131,7 @@ func (e *events) handlePullRequestComment(repoConfig *v1alpha1.RepoConfig, plugi
 }
 
 func (e *events) handlePullRequest(repoConfig *v1alpha1.RepoConfig, pluginConfig *v1alpha1.PluginConfigSpec, scmClient *scm.Client, event *scm.PullRequestHook) {
-	e.logger.Info("handle pull requesr")
+	e.logger.Info("handle pull request")
 	for name, plugin := range e.getPlugins(repoConfig) {
 		if plugin.PullRequestHandler != nil {
 			if err := plugin.PullRequestHandler(e.makePluginRequest(repoConfig, pluginConfig, scmClient, name), *event); err != nil {

@@ -7,7 +7,7 @@ import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/assign"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/blockade"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/blunderbuss"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/branchcleaner"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/branchcleaner"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/bugzilla"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/buildifier"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/cat"
@@ -47,7 +47,7 @@ import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/trigger"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/updateconfig"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/verify-owners"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/welcome"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/welcome"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/wip"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/yuks"
 )

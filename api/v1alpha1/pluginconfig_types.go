@@ -25,9 +25,10 @@ type PluginConfigSpec struct {
 	// Owners contains configuration related to handling OWNERS files.
 	Owners Owners `json:"owners,omitempty"`
 	// Built-in plugins specific configuration.
-	Cat   Cat   `json:"cat,omitempty"`
-	Goose Goose `json:"goose,omitempty"`
-	Size  Size  `json:"size,omitempty"`
+	Cat     Cat     `json:"cat,omitempty"`
+	Goose   Goose   `json:"goose,omitempty"`
+	Size    Size    `json:"size,omitempty"`
+	Welcome Welcome `json:"welcome,omitempty"`
 }
 
 // Cat contains the configuration for the cat plugin.
@@ -50,6 +51,12 @@ type Size struct {
 	L   int `json:"l"`
 	Xl  int `json:"xl"`
 	Xxl int `json:"xxl"`
+}
+
+// Welcome contains the configuration for the welcome plugin.
+type Welcome struct {
+	// MessageTemplate is the welcome message template to post on new-contributor PRs
+	MessageTemplate string `json:"messageTemplate,omitempty"`
 }
 
 // Owners contains configuration related to handling OWNERS files.

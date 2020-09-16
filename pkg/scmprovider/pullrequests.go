@@ -63,3 +63,30 @@ func (s PullRequests) GetLabels(repo string, number int) ([]*scm.Label, error) {
 	}
 	return labels, err
 }
+
+func (s PullRequests) FindByAuthor(repo string, author string) ([]*scm.PullRequest, error) {
+	ctx := context.Background()
+	var allPullRequests []*scm.PullRequest
+	var resp *scm.Response
+	var pullRequests []*scm.PullRequest
+	var err error
+	firstRun := false
+	opts := scm.PullRequestListOptions{
+		Page: 1,
+	}
+	for !firstRun || (resp != nil && opts.Page <= resp.Page.Last) {
+		pullRequests, resp, err = s.client.List(ctx, repo, opts)
+		if err != nil {
+			return nil, err
+		}
+		firstRun = true
+		for _, pullRequest := range pullRequests {
+			if pullRequest.Author.Login == author {
+				allPullRequests = append(allPullRequests, pullRequest)
+			}
+		}
+		opts.Page++
+	}
+	return allPullRequests, err
+
+}

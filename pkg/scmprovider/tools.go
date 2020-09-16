@@ -19,6 +19,13 @@ func (s Tools) QuoteAuthorForComment(author string) string {
 	return author
 }
 
+func (s Tools) RefToBranchName(ref string) string {
+	if s.client.Driver == scm.DriverGitea {
+		return ref
+	}
+	return fmt.Sprintf("heads/%s", ref)
+}
+
 // ImageTooBig checks if image is bigger than github limits
 func (s Tools) ImageTooBig(url string) (bool, error) {
 	// limit is 10MB
