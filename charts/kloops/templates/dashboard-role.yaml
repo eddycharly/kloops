@@ -1,0 +1,32 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "dashboard.name" . }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - configmaps
+  - secrets
+  verbs:
+  - get
+  - update
+  - create
+  - list
+  - watch
+- apiGroups:
+  - config.kloops.io
+  resources:
+  - repoconfigs
+  - repoconfigs/status
+  - pluginconfigs
+  - pluginconfigs/status
+  verbs:
+  - create
+  - delete
+  - list
+  - update
+  - get
+  - watch
+  - patch

@@ -1,0 +1,8 @@
+FROM alpine:3.12
+
+COPY bin/dashboard /kloops/kloops-dashboard
+COPY dashboard/build /kloops/dashboard/build
+
+WORKDIR /kloops
+
+ENTRYPOINT ["./kloops-dashboard"]

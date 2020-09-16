@@ -1,6 +1,7 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= eddycharly/kloops:latest
+IMG ?= eddycharly/kloops
+TAG ?= latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -24,9 +25,19 @@ manager: generate fmt vet
 manager-linux: generate fmt vet
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/manager main.go
 
+dashboard-linux: generate fmt vet
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/dashboard cmd/dashboard/main.go
+
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
 	go run ./main.go
+
+dashboard-front:
+	cd dashboard && npm install && npm run build
+
+# Run against the configured Kubernetes cluster in ~/.kube/config
+run-dashboard: generate fmt vet manifests
+	go run ./cmd/dashboard/main.go
 
 # Install CRDs into a cluster
 install: manifests
@@ -64,6 +75,13 @@ docker-build: manager-linux
 # Push the docker image
 docker-push: docker-build
 	docker push ${IMG}
+
+docker-dashboard-build: # dashboard-linux dashboard-front
+	docker build . -t ${IMG}-dashboard:${TAG} -f Dockerfile.dashboard
+
+# Push the docker image
+docker-dashboard-push: docker-dashboard-build
+	docker push ${IMG}-dashboard:${TAG}
 
 # find or download controller-gen
 # download controller-gen if necessary

@@ -25,7 +25,30 @@ chatbot:
     requests:
       cpu: 80m
       memory: 128Mi
+  ingress:
+    enabled: false
+    annotations: {}
+    hosts: []
 
+dashboard:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: eddycharly/kloops-dashboard
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 8090
+    annotations: {}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 80m
+      memory: 128Mi
   ingress:
     enabled: false
     annotations: {}
