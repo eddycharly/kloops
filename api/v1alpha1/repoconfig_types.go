@@ -99,9 +99,8 @@ type RepoConfigStatus struct {
 type RepoConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   RepoConfigSpec   `json:"spec,omitempty"`
-	Status RepoConfigStatus `json:"status,omitempty"`
+	Spec              RepoConfigSpec   `json:"spec,omitempty"`
+	Status            RepoConfigStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

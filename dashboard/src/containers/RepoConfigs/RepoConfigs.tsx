@@ -1,26 +1,29 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import Moment from 'react-moment';
 import {
   Divider,
   GridList,
   GridListTile,
   Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography
 } from '@material-ui/core';
 import {
-  getRepoConfigs
+  listRepoConfigs
 } from '../../api/repoconfigs';
 
 const useStyles = makeStyles((theme) => ({
-  content: {
-    flexGrow: 1,
-    height: '100vh',
-    overflow: 'auto',
-    backgroundColor: "#f4f4f4",
-  },
   paper: {
+    margin: "20px",
+    padding: "20px",
     height: "100%",
-    width: "100%",
+    // width: "100%",
   },
 }));
 
@@ -29,16 +32,58 @@ function RepoConfigs() {
   const [items, setItems] = React.useState<any[]>([]);
 
   React.useEffect(() => {
-    getRepoConfigs().then(result => setItems(result))
-  }, [])
+    listRepoConfigs().then(result => setItems(result));
+  }, []);
 
-
+  const scmInfos = (repo: any) => {
+    if (repo.spec.gitea) return {
+      provider:  "Gitea",
+      organization: repo.spec.gitea.owner,
+      repository: repo.spec.gitea.repo,
+    };
+    if (repo.spec.gitHub) return {
+      provider:  "GitHub",
+      organization: repo.spec.gitHub.owner,
+      repository: repo.spec.gitHub.repo,
+    };
+    return {
+      provider: "Unknown",
+      organization: "Unknown",
+      repository: "Unknown",
+    };
+  };
   return (
-    <>
-      {items.map(x => (
-        <Typography>{x.metadata.name}</Typography>
-      ))}
-    </>
+    <Paper className={classes.paper}>
+      <Table aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Namespace</TableCell>
+            <TableCell>Bot name</TableCell>
+            <TableCell>Scm provider</TableCell>
+            <TableCell>Organization</TableCell>
+            <TableCell>Repository</TableCell>
+            <TableCell>Age</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {items.map((row) => {
+            const infos = scmInfos(row);
+            return (
+              <TableRow key={row.metadata.name}>
+                <TableCell component="th" scope="row">{row.metadata.name}</TableCell>
+                <TableCell component="th" scope="row">{row.metadata.namespace}</TableCell>
+                <TableCell component="th" scope="row">{row.spec.botName}</TableCell>
+                <TableCell component="th" scope="row">{infos.provider}</TableCell>
+                <TableCell component="th" scope="row">{infos.organization}</TableCell>
+                <TableCell component="th" scope="row">{infos.repository}</TableCell>
+                <TableCell><Moment fromNow>{row.metadata.creationTimestamp}</Moment></TableCell>
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+    </Paper>
   );
 }
 

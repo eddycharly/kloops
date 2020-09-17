@@ -37,7 +37,7 @@ dashboard-front:
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run-dashboard: generate fmt vet manifests
-	go run ./cmd/dashboard/main.go
+	go run ./cmd/dashboard/main.go --namespace tools
 
 # Install CRDs into a cluster
 install: manifests

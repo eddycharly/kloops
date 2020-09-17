@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   AppBar,
+  Avatar,
   IconButton,
   LinearProgress,
   Toolbar,
@@ -35,10 +36,14 @@ const useStyles = makeStyles((theme) => ({
     }),
   },
   menuButton: {
-    marginRight: 36,
+    marginRight: 30,
   },
   menuButtonHidden: {
     display: 'none',
+  },
+  logo: {
+    maxHeight: 48,
+    marginRight: 30,
   },
 }));
 
@@ -57,6 +62,7 @@ function TopBar(props: any) {
         >
           <MenuIcon />
         </IconButton>
+        <img src="logo.png" alt="logo" className={classes.logo} />
         <Typography variant="h6" noWrap>
           KLOOPS
       </Typography>

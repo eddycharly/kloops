@@ -9,12 +9,6 @@ import {
 } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
-  content: {
-    flexGrow: 1,
-    height: '100vh',
-    overflow: 'auto',
-    backgroundColor: "#f4f4f4",
-  },
   paper: {
     height: "100%",
     width: "100%",
