@@ -65,7 +65,7 @@ func main() {
 
 	stopCh := ctrl.SetupSignalHandler()
 
-	server := server.NewServer(mgr.GetConfig(), mgr.GetClient(), ctrl.Log)
+	server := server.NewServer(namespace, mgr.GetConfig(), mgr.GetClient(), ctrl.Log)
 
 	go func() {
 		if err := server.Start("", 8090); err != nil {

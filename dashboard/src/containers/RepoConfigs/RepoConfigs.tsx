@@ -1,35 +1,43 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Moment from 'react-moment';
 import {
-  Divider,
-  GridList,
-  GridListTile,
+  Fab,
   Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
-  TableRow,
-  Typography
+  TableRow
 } from '@material-ui/core';
+import {
+  Add as AddIcon
+} from '@material-ui/icons';
 import {
   listRepoConfigs
 } from '../../api/repoconfigs';
+import {
+  RepoConfigForm
+} from '..';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    margin: "20px",
-    padding: "20px",
+    margin: theme.spacing(2),
+    padding: theme.spacing(2),
     height: "100%",
-    // width: "100%",
+  },
+  fab: {
+    position: 'absolute',
+    bottom: theme.spacing(4),
+    right: theme.spacing(4),
   },
 }));
 
 function RepoConfigs() {
   const classes = useStyles();
   const [items, setItems] = React.useState<any[]>([]);
+  const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
     listRepoConfigs().then(result => setItems(result));
@@ -37,12 +45,12 @@ function RepoConfigs() {
 
   const scmInfos = (repo: any) => {
     if (repo.spec.gitea) return {
-      provider:  "Gitea",
+      provider: "Gitea",
       organization: repo.spec.gitea.owner,
       repository: repo.spec.gitea.repo,
     };
     if (repo.spec.gitHub) return {
-      provider:  "GitHub",
+      provider: "GitHub",
       organization: repo.spec.gitHub.owner,
       repository: repo.spec.gitHub.repo,
     };
@@ -52,38 +60,51 @@ function RepoConfigs() {
       repository: "Unknown",
     };
   };
+
+  const handleClose = () => {
+    setOpen(false);
+  }
+
   return (
-    <Paper className={classes.paper}>
-      <Table aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Namespace</TableCell>
-            <TableCell>Bot name</TableCell>
-            <TableCell>Scm provider</TableCell>
-            <TableCell>Organization</TableCell>
-            <TableCell>Repository</TableCell>
-            <TableCell>Age</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {items.map((row) => {
-            const infos = scmInfos(row);
-            return (
-              <TableRow key={row.metadata.name}>
-                <TableCell component="th" scope="row">{row.metadata.name}</TableCell>
-                <TableCell component="th" scope="row">{row.metadata.namespace}</TableCell>
-                <TableCell component="th" scope="row">{row.spec.botName}</TableCell>
-                <TableCell component="th" scope="row">{infos.provider}</TableCell>
-                <TableCell component="th" scope="row">{infos.organization}</TableCell>
-                <TableCell component="th" scope="row">{infos.repository}</TableCell>
-                <TableCell><Moment fromNow>{row.metadata.creationTimestamp}</Moment></TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </Paper>
+    <>
+      <RepoConfigForm open={open} onClose={handleClose} />
+      <Paper className={classes.paper}>
+        <Table aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Namespace</TableCell>
+              <TableCell>Bot name</TableCell>
+              <TableCell>Scm provider</TableCell>
+              <TableCell>Organization</TableCell>
+              <TableCell>Repository</TableCell>
+              <TableCell>Age</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map((row) => {
+              const infos = scmInfos(row);
+              return (
+                <TableRow key={row.metadata.name}>
+                  <TableCell component="th" scope="row">
+                    <Link to={`/config/repository/${row.metadata.name}`}>{row.metadata.name}</Link>
+                  </TableCell>
+                  <TableCell component="th" scope="row">{row.metadata.namespace}</TableCell>
+                  <TableCell component="th" scope="row">{row.spec.botName}</TableCell>
+                  <TableCell component="th" scope="row">{infos.provider}</TableCell>
+                  <TableCell component="th" scope="row">{infos.organization}</TableCell>
+                  <TableCell component="th" scope="row">{infos.repository}</TableCell>
+                  <TableCell><Moment fromNow>{row.metadata.creationTimestamp}</Moment></TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+        <Fab color="secondary" aria-label="add" className={classes.fab} onClick={() => setOpen(true)}>
+          <AddIcon />
+        </Fab>
+      </Paper>
+    </>
   );
 }
 

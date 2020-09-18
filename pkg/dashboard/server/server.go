@@ -18,16 +18,18 @@ type Server interface {
 }
 
 type server struct {
-	config *rest.Config
-	client client.Client
-	logger logr.Logger
+	namespace string
+	config    *rest.Config
+	client    client.Client
+	logger    logr.Logger
 }
 
-func NewServer(config *rest.Config, client client.Client, logger logr.Logger) Server {
+func NewServer(namespace string, config *rest.Config, client client.Client, logger logr.Logger) Server {
 	return &server{
-		config: config,
-		client: client,
-		logger: logger.WithName("Server"),
+		namespace: namespace,
+		config:    config,
+		client:    client,
+		logger:    logger.WithName("Server"),
 	}
 }
 
@@ -38,9 +40,10 @@ func (s *server) Start(addr string, port int) error {
 	// Proxy
 	r.Handle(proxyRoute, handlers.NewProxyHandler(s.config, logger))
 	// Api
-	repoConfig := handlers.NewReponConfigHandler(s.client, s.logger)
+	repoConfig := handlers.NewReponConfigHandler(s.namespace, s.client, s.logger)
 	r.HandleFunc("/api/repos", repoConfig.List).Methods("GET")
-	// r.HandleFunc("/repos/{namespace}/{name}", repoConfig.List).Methods("GET")
+	r.HandleFunc("/api/repos/{name}", repoConfig.Get).Methods("GET")
+	r.HandleFunc("/api/repos", repoConfig.Create).Methods("POST")
 	// Static content
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./dashboard/build"))))
 	return http.ListenAndServe(fmt.Sprintf("%s:%d", addr, port), r)
