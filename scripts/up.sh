@@ -189,6 +189,7 @@ spec:
   pluginConfig:
     ref: default
     plugins:
+      - assign
       - branchcleaner
       - cat
       - dog
