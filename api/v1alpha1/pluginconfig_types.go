@@ -27,6 +27,7 @@ type PluginConfigSpec struct {
 	// Built-in plugins specific configuration.
 	Cat     Cat     `json:"cat,omitempty"`
 	Goose   Goose   `json:"goose,omitempty"`
+	Label   Label   `json:"label,omitempty"`
 	Size    Size    `json:"size,omitempty"`
 	Welcome Welcome `json:"welcome,omitempty"`
 }
@@ -41,6 +42,13 @@ type Cat struct {
 type Goose struct {
 	// Key is the api key for unsplash.com
 	Key Secret `json:"key"`
+}
+
+// Label contains the configuration for the label plugin.
+type Label struct {
+	// AdditionalLabels is a set of additional labels enabled for use
+	// on top of the existing "kind/*", "priority/*", and "area/*" labels.
+	AdditionalLabels []string `json:"additionalLabels"`
 }
 
 // Size specifies configuration for the size plugin, defining lower bounds (in # lines changed) for each size label.

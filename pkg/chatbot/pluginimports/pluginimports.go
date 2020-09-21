@@ -22,7 +22,7 @@ import (
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/hold"
 
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/invalidcommitmsg"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/label"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/label"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/lgtm"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/lifecycle"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/merge-method-comment"
