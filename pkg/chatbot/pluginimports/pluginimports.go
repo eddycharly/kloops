@@ -43,7 +43,7 @@ import (
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/size"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/skip"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/slackevents"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/stage"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/stage"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/trigger"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/updateconfig"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/verify-owners"

@@ -192,8 +192,12 @@ spec:
       - branchcleaner
       - cat
       - dog
+      - goose
+      - pony
       - shrug
+      - stage
       - welcome
+      - wip
       - yuks
 EOF
 }
