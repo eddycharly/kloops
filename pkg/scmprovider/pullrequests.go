@@ -88,5 +88,16 @@ func (s PullRequests) FindByAuthor(repo string, author string) ([]*scm.PullReque
 		opts.Page++
 	}
 	return allPullRequests, err
+}
 
+func (s PullRequests) RequestReview(repo string, number int, logins []string) error {
+	ctx := context.Background()
+	_, err := s.client.RequestReview(ctx, repo, number, logins)
+	return errors.Wrapf(err, "requesting review from %s", logins)
+}
+
+func (s PullRequests) UnrequestReview(repo string, number int, logins []string) error {
+	ctx := context.Background()
+	_, err := s.client.UnrequestReview(ctx, repo, number, logins)
+	return errors.Wrapf(err, "unrequesting review from %s", logins)
 }

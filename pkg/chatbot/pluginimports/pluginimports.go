@@ -4,7 +4,7 @@ package pluginimports
 // any hook binary.
 import (
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/approve" // Import all enabled plugins.
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/assign"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/assign"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/blockade"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/blunderbuss"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/branchcleaner"

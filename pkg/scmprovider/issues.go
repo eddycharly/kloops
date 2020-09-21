@@ -42,6 +42,18 @@ func (s Issues) RemoveLabel(repo string, number int, label string) error {
 	return err
 }
 
+func (s Issues) Assign(repo string, number int, logins []string) error {
+	ctx := context.Background()
+	_, err := s.client.AssignIssue(ctx, repo, number, logins)
+	return err
+}
+
+func (s Issues) Unassign(repo string, number int, logins []string) error {
+	ctx := context.Background()
+	_, err := s.client.UnassignIssue(ctx, repo, number, logins)
+	return err
+}
+
 func (s Issues) GetLabels(repo string, number int) ([]*scm.Label, error) {
 	ctx := context.Background()
 	var allLabels []*scm.Label
