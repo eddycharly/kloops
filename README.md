@@ -9,8 +9,8 @@ A dashboard is available to configure KLoops and visualize running or past jobs.
 Supported providers:
 - Github
 - Github entreprise
-- Gitlab
-- BitBucket cloud
+- Gitlab (WIP)
+- BitBucket cloud (WIP)
 - Gitea
 
 Behind the scene, we leverage [Tekton pipelines](https://github.com/tektoncd/pipeline) to run build pipelines execution. The [Tekton dashboard](https://github.com/tektoncd/dashboard) provides pipelines execution and logs visualization.
