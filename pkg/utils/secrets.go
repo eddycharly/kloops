@@ -14,6 +14,10 @@ func GetSecret(client client.Client, namespace string, secret v1alpha1.Secret) (
 	if secret.Value != "" {
 		return []byte(secret.Value), nil
 	}
+	if secret.ValueFrom == nil {
+		// TODO return error ?
+		return []byte(""), nil
+	}
 	nn := types.NamespacedName{
 		Namespace: namespace,
 		Name:      secret.ValueFrom.SecretKeyRef.Name,

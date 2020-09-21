@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Moment from 'react-moment';
 import {
   Fab,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -12,11 +13,13 @@ import {
   TableRow
 } from '@material-ui/core';
 import {
-  Add as AddIcon
+  Add as AddIcon,
+  RssFeed as RssFeedIcon
 } from '@material-ui/icons';
 import {
+  createHook,
   listRepoConfigs
-} from '../../api/repoconfigs';
+} from '../../api';
 import {
   RepoConfigForm
 } from '..';
@@ -65,10 +68,14 @@ function RepoConfigs() {
     setOpen(false);
   }
 
+  const onHook = (name: string) => {
+    createHook(name);
+  }
+  
   return (
     <>
       <RepoConfigForm open={open} onClose={handleClose} />
-      <Paper className={classes.paper}>
+      <Paper className={classes.paper} square>
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -79,6 +86,7 @@ function RepoConfigs() {
               <TableCell>Organization</TableCell>
               <TableCell>Repository</TableCell>
               <TableCell>Age</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -95,6 +103,11 @@ function RepoConfigs() {
                   <TableCell component="th" scope="row">{infos.organization}</TableCell>
                   <TableCell component="th" scope="row">{infos.repository}</TableCell>
                   <TableCell><Moment fromNow>{row.metadata.creationTimestamp}</Moment></TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => onHook(row.metadata.name)} size="small">
+                      <RssFeedIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               )
             })}

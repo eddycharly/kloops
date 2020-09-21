@@ -11,7 +11,6 @@ import {
   ListSubheader,
   Toolbar
 } from '@material-ui/core';
-
 import {
   ChevronLeft as ChevronLeftIcon
 } from '@material-ui/icons';

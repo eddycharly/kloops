@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func getSecret(client client.Client, namespace string, secret v1alpha1.Secret) ([]byte, error) {
+func GetSecret(client client.Client, namespace string, secret v1alpha1.Secret) ([]byte, error) {
 	if secret.Value != "" {
 		return []byte(secret.Value), nil
 	}
@@ -34,7 +34,7 @@ func getSecret(client client.Client, namespace string, secret v1alpha1.Secret) (
 func GitTokenFunc(client client.Client, repoConfig *v1alpha1.RepoConfig) (git.TokenFunc, error) {
 	if repoConfig.Spec.GitHub != nil {
 		return func() []byte {
-			data, err := getSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.Token)
+			data, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.Token)
 			if err == nil {
 				return data
 			}

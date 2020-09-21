@@ -25,9 +25,9 @@ metadata:
 spec:
   s3:
     aws_key_id:
-      value: ACCESSKEY
+      value: ACCESS_KEY
     aws_sec_key:
-      value: SECRETKEY
+      value: SECRET_KEY
     s3_endpoint: http://minio.tools.svc.cluster.local:9000
     s3_bucket: tekton-logs
     s3_region: tekton

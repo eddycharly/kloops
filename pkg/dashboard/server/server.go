@@ -41,9 +41,14 @@ func (s *server) Start(addr string, port int) error {
 	r.Handle(proxyRoute, handlers.NewProxyHandler(s.config, logger))
 	// Api
 	repoConfig := handlers.NewReponConfigHandler(s.namespace, s.client, s.logger)
+	pluginConfig := handlers.NewPluginConfigHandler(s.namespace, s.client, s.logger)
+	r.HandleFunc("/api/plugins", pluginConfig.List).Methods("GET")
+	r.HandleFunc("/api/plugins/{name}", pluginConfig.Get).Methods("GET")
+	// r.HandleFunc("/api/plugins", pluginConfig.Create).Methods("POST")
 	r.HandleFunc("/api/repos", repoConfig.List).Methods("GET")
 	r.HandleFunc("/api/repos/{name}", repoConfig.Get).Methods("GET")
 	r.HandleFunc("/api/repos", repoConfig.Create).Methods("POST")
+	r.HandleFunc("/api/hooks/{name}", repoConfig.Hook).Methods("POST")
 	// Static content
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./dashboard/build"))))
 	return http.ListenAndServe(fmt.Sprintf("%s:%d", addr, port), r)

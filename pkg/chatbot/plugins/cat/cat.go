@@ -76,10 +76,15 @@ func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plu
 
 func getKey(request plugins.PluginRequest) func() string {
 	return func() string {
-		key, err := utils.GetSecret(request.Client(), request.RepoConfig().Namespace, request.PluginConfig().Cat.Key)
+		pluginConfig := request.PluginConfig()
+		if pluginConfig == nil {
+			return ""
+		}
+		key, err := utils.GetSecret(request.Client(), request.RepoConfig().Namespace, pluginConfig.Cat.Key)
 		if err == nil {
 			return string(key)
 		}
+		fmt.Println(err)
 		return ""
 	}
 }

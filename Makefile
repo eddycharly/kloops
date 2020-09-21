@@ -20,10 +20,10 @@ test: generate fmt vet manifests
 
 # Build manager binary
 manager: generate fmt vet
-	go build -o bin/manager main.go
+	go build -o bin/chatbot main.go
 
-manager-linux: generate fmt vet
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/manager main.go
+chatbot-linux: generate fmt vet
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/chatbot main.go
 
 dashboard-linux: generate fmt vet
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/dashboard cmd/dashboard/main.go
@@ -68,18 +68,15 @@ vet:
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-# Build the docker image
-docker-build: manager-linux
-	docker build . -t ${IMG}
+docker-chatbot-build: chatbot-linux
+	docker build . -t ${IMG}-chatbot:${TAG} -f Dockerfile.chatbot
 
-# Push the docker image
-docker-push: docker-build
-	docker push ${IMG}
+docker-chatbot-push: docker-chatbot-build
+	docker push ${IMG}-chatbot:${TAG}
 
-docker-dashboard-build: # dashboard-linux dashboard-front
+docker-dashboard-build: dashboard-linux dashboard-front
 	docker build . -t ${IMG}-dashboard:${TAG} -f Dockerfile.dashboard
 
-# Push the docker image
 docker-dashboard-push: docker-dashboard-build
 	docker push ${IMG}-dashboard:${TAG}
 

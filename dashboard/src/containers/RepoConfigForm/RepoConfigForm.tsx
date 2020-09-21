@@ -15,7 +15,7 @@ import {
 } from '@material-ui/core';
 import {
   createRepoConfig
-} from '../../api/repoconfigs';
+} from '../../api';
 
 const useDataBind = (initial: any) => {
   const [value, setVal] = React.useState(initial)

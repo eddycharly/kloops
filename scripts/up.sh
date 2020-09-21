@@ -29,7 +29,7 @@ function verify_supported() {
     exit 1
   fi
   if [ "$NO_INIT" == "false" ] && ! type "jq" > /dev/null 2>&1; then
-    echo "js is required"
+    echo "jq is required"
     exit 1
   fi
   if ! type "kubectl" > /dev/null 2>&1; then
@@ -64,6 +64,8 @@ function update_helm_repos() {
 function deploy_nginx_ingress() {
     message "Deploying NGINX ingress controller ..."
     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-0.32.0/deploy/static/provider/kind/deploy.yaml
+    sleep 30s
+    kubectl wait -n ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=120s
 }
 
 function deploy_metrics_server() {
@@ -88,12 +90,12 @@ function deploy_logging_operator() {
 
 function deploy_logging_pipeline() {
     message "Deploying logging pipeline ..."
-    kubectl apply -f ./scripts/logging-pipeline.yaml
+    kubectl apply -n tools -f ./scripts/logging-pipeline.yaml
 }
 
 function deploy_logs_server() {
     message "Deploying logs server ..."
-    kubectl apply -f ./scripts/logs-server.yaml
+    kubectl apply -n tools -f ./scripts/logs-server.yaml
 }
 
 function deploy_tekton_pipelines() {
@@ -198,7 +200,7 @@ EOF
 
 function cluster_up() {
     message "Cluster up !"
-    echo "Kubernetes dashboard URL   : http://k8s-dashboard.127.0.0.1.nip.io"
+    # echo "Kubernetes dashboard URL   : http://k8s-dashboard.127.0.0.1.nip.io"
     echo "Minio URL                  : http://minio.127.0.0.1.nip.io"
     echo "Logs server URL            : http://logs.127.0.0.1.nip.io"
     echo "Tekton dashboard URL       : http://tekton-dashboard.127.0.0.1.nip.io"

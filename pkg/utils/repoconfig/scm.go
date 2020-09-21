@@ -12,7 +12,7 @@ import (
 
 func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, string, string, scm.SecretFunc, error) {
 	if repoConfig.Spec.GitHub != nil {
-		token, err := getSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.Token)
+		token, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.Token)
 		if err != nil {
 			return "", "", "", nil, errors.New("failed to read token")
 		}
@@ -20,7 +20,7 @@ func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, st
 			repoConfig.Spec.GitHub.ServerURL,
 			string(token),
 			func(scm.Webhook) (string, error) {
-				hmac, err := getSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.HmacToken)
+				hmac, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.HmacToken)
 				if err != nil {
 					return "", err
 				}
@@ -28,7 +28,7 @@ func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, st
 			},
 			nil
 	} else if repoConfig.Spec.Gitea != nil {
-		token, err := getSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.Token)
+		token, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.Token)
 		if err != nil {
 			return "", "", "", nil, errors.New("failed to read token")
 		}
@@ -36,7 +36,7 @@ func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, st
 			repoConfig.Spec.Gitea.ServerURL,
 			string(token),
 			func(scm.Webhook) (string, error) {
-				hmac, err := getSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.HmacToken)
+				hmac, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.HmacToken)
 				if err != nil {
 					return "", err
 				}

@@ -1,8 +1,9 @@
+import { RepoConfig } from '../models/RepoConfig';
 import { getApiEndpoint } from './api';
 
 const path = '/api/repos';
 
-export function listRepoConfigs(): Promise<Array<any>> {
+export function listRepoConfigs(): Promise<Array<RepoConfig>> {
   const uri = `${getApiEndpoint()}${path}`;
 
   return fetch(uri)
@@ -11,7 +12,7 @@ export function listRepoConfigs(): Promise<Array<any>> {
     });
 }
 
-export function getRepoConfig(name: string): Promise<any> {
+export function getRepoConfig(name: string): Promise<RepoConfig> {
   const uri = `${getApiEndpoint()}${path}/${name}`;
 
   return fetch(uri)
@@ -32,5 +33,13 @@ export function createRepoConfig(config: any): Promise<any> {
     body: JSON.stringify(config)
   }).then(response => {
     return response.json();
+  });
+}
+
+export function createHook(name: any): Promise<any> {
+  const uri = `${getApiEndpoint()}/api/hooks/${name}`;
+
+  return fetch(uri, {
+    method: 'POST',
   });
 }

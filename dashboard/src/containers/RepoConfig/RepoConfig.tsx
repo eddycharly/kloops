@@ -19,7 +19,7 @@ import {
 
 import {
   getRepoConfig
-} from '../../api/repoconfigs';
+} from '../../api';
 
 const useStyles = makeStyles((theme) => ({
   paper: {

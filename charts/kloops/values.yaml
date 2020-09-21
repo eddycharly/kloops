@@ -10,7 +10,7 @@ chatbot:
   enabled: true
   replicaCount: 1
   image:
-    repository: eddycharly/kloops
+    repository: eddycharly/kloops-chatbot
     tag: latest
     pullPolicy: IfNotPresent
   service:
