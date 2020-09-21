@@ -19,7 +19,8 @@ import (
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/goose"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/heart"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/help"
-	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/hold"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/plugins/hold"
+
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/invalidcommitmsg"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/label"
 	// _ "github.com/eddycharly/kloops/pkg/chatbot/plugins/lgtm"

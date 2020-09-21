@@ -1,28 +1,8 @@
-/*
-Copyright 2017 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package help
 
 import (
-	"strings"
-
-	"github.com/apex/log"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 	"github.com/jenkins-x/go-scm/scm"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -130,12 +110,12 @@ func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plu
 		// }
 
 		if err := scmClient.Issues.AddLabel(event.Repo.FullName, event.Number, labelGoodFirstIssue); err != nil {
-			log.WithError(err).Errorf("GitHub failed to add the following label: %s", labelGoodFirstIssue)
+			logger.Error(err, "GitHub failed to add the following label")
 		}
 
 		if !hasHelp {
 			if err := scmClient.Issues.AddLabel(event.Repo.FullName, event.Number, labelHelp); err != nil {
-				log.WithError(err).Errorf("GitHub failed to add the following label: %s", labelHelp)
+				logger.Error(err, "GitHub failed to add the following label")
 			}
 		}
 
@@ -149,7 +129,7 @@ func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plu
 		// 	log.WithError(err).Errorf("Failed to create comment \"%s\".", helpMsg)
 		// }
 		if err := scmClient.Issues.AddLabel(event.Repo.FullName, event.Number, labelHelp); err != nil {
-			log.WithError(err).Errorf("GitHub failed to add the following label: %s", labelHelp)
+			logger.Error(err, "GitHub failed to add the following label")
 		}
 
 		return nil
@@ -159,7 +139,7 @@ func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plu
 	// remove just the good-first-issue label
 	if hasGoodFirstIssue && match.Name == "good-first-issue" && match.Prefix == "remove-" {
 		if err := scmClient.Issues.RemoveLabel(event.Repo.FullName, event.Number, labelGoodFirstIssue); err != nil {
-			log.WithError(err).Errorf("GitHub failed to remove the following label: %s", labelGoodFirstIssue)
+			logger.Error(err, "GitHub failed to remove the following label")
 		}
 
 		// botName, err := spc.BotName()
@@ -174,12 +154,12 @@ func handle(match plugins.CommandMatch, request plugins.PluginRequest, event plu
 	return nil
 }
 
-// shouldPrune finds comments left by this plugin.
-func shouldPrune(log *logrus.Entry, botName, msgPruneMatch string) func(*scm.Comment) bool {
-	return func(comment *scm.Comment) bool {
-		if comment.Author.Login != botName {
-			return false
-		}
-		return strings.Contains(comment.Body, msgPruneMatch)
-	}
-}
+// // shouldPrune finds comments left by this plugin.
+// func shouldPrune(log *logrus.Entry, botName, msgPruneMatch string) func(*scm.Comment) bool {
+// 	return func(comment *scm.Comment) bool {
+// 		if comment.Author.Login != botName {
+// 			return false
+// 		}
+// 		return strings.Contains(comment.Body, msgPruneMatch)
+// 	}
+// }
