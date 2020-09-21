@@ -31,6 +31,8 @@ You can deploy a fully working solution on a local cluster with `kind`, using `G
 
 Clone the repository and run `./scripts/up.sh`, it will create a `kind` cluster, deploy everything in it and initialize `Gitea` with sample datas.
 
+You can look at our [ROADMAP](./ROADMAP.md), feel free ro create issues or open pull requests to contribute.
+
 ## Why KLoops ?
 
 KLoops was created after working with Prow and Lighthouse for several years. Both have limitations that KLoops adresses:
