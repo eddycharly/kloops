@@ -12,7 +12,7 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-all: manager
+all: chatbot dashboard
 
 # Run tests
 test: generate fmt vet manifests
