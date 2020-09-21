@@ -61,9 +61,9 @@ function SideNav(props: any) {
         <List>
           <ListSubheader>Configuration</ListSubheader>
           <Divider />
-          <ListItem button component={Link} to="/config/kloops" onClick={props.handleDrawerClose}>
+          {/* <ListItem button component={Link} to="/config/kloops" onClick={props.handleDrawerClose}>
             <ListItemText primary="Kloops" />
-          </ListItem>
+          </ListItem> */}
           <ListItem button component={Link} to="/config/repositories" onClick={props.handleDrawerClose}>
             <ListItemText primary="Repositories" />
           </ListItem>
