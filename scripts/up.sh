@@ -80,7 +80,7 @@ function deploy_kubernetes_dashboard() {
 
 function deploy_minio() {
     message "Deploying minio storage ..."
-    $HELM_BINARY upgrade --install --wait --create-namespace --namespace tools minio minio/minio --values ./scripts/minio-config.yaml
+    $HELM_BINARY upgrade --install --version 6.3.1 --wait --create-namespace --namespace tools minio minio/minio --values ./scripts/minio-config.yaml
 }
 
 function deploy_logging_operator() {
