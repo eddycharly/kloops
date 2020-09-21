@@ -14,17 +14,14 @@ import (
 	"github.com/jenkins-x/go-scm/scm"
 )
 
-var (
-	grumpyKeywords = regexp.MustCompile(`(?mi)^(no|grumpy)\s*$`)
-)
-
 const (
 	pluginName = "cat"
 	grumpyURL  = "https://upload.wikimedia.org/wikipedia/commons/e/ee/Grumpy_Cat_by_Gage_Skidmore.jpg"
 )
 
 var (
-	plugin = plugins.Plugin{
+	grumpyKeywords = regexp.MustCompile(`(?mi)^(no|grumpy)\s*$`)
+	plugin         = plugins.Plugin{
 		Description:        "The cat plugin adds a cat image to an issue or PR in response to the `/meow` command.",
 		ConfigHelpProvider: configHelp,
 		Commands: []plugins.Command{{

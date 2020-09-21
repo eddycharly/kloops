@@ -80,6 +80,10 @@ docker-dashboard-build: dashboard-linux dashboard-front
 docker-dashboard-push: docker-dashboard-build
 	docker push ${IMG}-dashboard:${TAG}
 
+docker-build: docker-chatbot-build docker-dashboard-build
+
+docker-push: docker-chatbot-push docker-dashboard-push
+
 # find or download controller-gen
 # download controller-gen if necessary
 controller-gen:
