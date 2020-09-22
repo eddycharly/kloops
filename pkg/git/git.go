@@ -103,8 +103,8 @@ func (c *client) Clone(repo string, base string, user string, token TokenFunc) (
 
 	pass := string(token())
 	if user != "" && pass != "" {
-		host := gitHost(base)
-		base = fmt.Sprintf("http://%s:%s@%s", user, pass, host)
+		scheme, host := gitHostAndScheme(base)
+		base = fmt.Sprintf("%s://%s:%s@%s", scheme, user, pass, host)
 	}
 	cache := filepath.Join(c.dir, repo) + ".git"
 	if _, err := os.Stat(cache); os.IsNotExist(err) {
@@ -156,12 +156,15 @@ func (c *client) Clone(repo string, base string, user string, token TokenFunc) (
 	}, nil
 }
 
-func gitHost(s string) string {
+func gitHostAndScheme(s string) (string, string) {
 	u, err := url.Parse(s)
 	if err == nil {
-		return u.Host
+		return u.Scheme, u.Host
 	}
-	return strings.TrimPrefix(s, "https://")
+	if strings.HasPrefix(s, "http://") {
+		return "http", strings.TrimPrefix(s, "http://")
+	}
+	return "https", strings.TrimPrefix(s, "https://")
 }
 
 // Repo is a clone of a git repository. Launch with Client.Clone, and don't
@@ -278,8 +281,8 @@ func (r *Repo) Push(repo, branch string) error {
 		return errors.New("cannot push without credentials - configure your git client")
 	}
 	r.logger.WithValues("user", r.user, "repo", repo, "branch", branch).Info("Pushing")
-	host := gitHost(r.base)
-	remote := fmt.Sprintf("http://%s:%s@%s/%s/%s", r.user, r.pass, host, r.user, repo)
+	scheme, host := gitHostAndScheme(r.base)
+	remote := fmt.Sprintf("%s://%s:%s@%s/%s/%s", scheme, r.user, r.pass, host, r.user, repo)
 	co := r.gitCommand("push", remote, branch)
 	msg, err := co.CombinedOutput()
 	fmt.Println(string(msg))
