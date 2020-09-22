@@ -85,10 +85,14 @@ func CreateHMACToken() (string, error) {
 	return hex.EncodeToString(b)[:41], nil
 }
 
+func GetGitServerURL() string {
+	return os.Getenv(gitServerEnvVar)
+}
+
 // CreateSCMClient takes functions that return the username and token to use, and creates the scm.Client and Lighthouse SCM client
 func CreateSCMClient(userFunc func() string, tokenFunc func() (string, error)) (*scm.Client, *scmprovider.Client, string, error) {
 	kind := GitKind()
-	serverURL := os.Getenv(gitServerEnvVar)
+	serverURL := GetGitServerURL()
 
 	token, err := tokenFunc()
 	if err != nil {
@@ -331,7 +335,6 @@ func CreateWebHook(scmClient *scm.Client, repo *scm.Repository, hmacToken string
 func WaitForPullRequestComment(client *scmprovider.Client, pr *scm.PullRequest, regex string) error {
 	gomega.Expect(pr.Sha).ShouldNot(gomega.Equal(""))
 	repo := pr.Repository()
-
 	checkPRStatuses := func() error {
 		comments, err := client.PullRequests.GetComments(repo.FullName, pr.Number)
 		if err != nil {
@@ -346,7 +349,28 @@ func WaitForPullRequestComment(client *scmprovider.Client, pr *scm.PullRequest, 
 
 		return errors.New(fmt.Sprintf("Failed to find a commeent matching: %s", regex))
 	}
+	exponentialBackOff := backoff.NewExponentialBackOff()
+	exponentialBackOff.MaxElapsedTime = 1 * time.Minute
+	exponentialBackOff.MaxInterval = 5 * time.Second
+	exponentialBackOff.Reset()
+	return backoff.Retry(checkPRStatuses, exponentialBackOff)
+}
 
+func WaitForIssueComment(client *scmprovider.Client, repo *scm.Repository, issue *scm.Issue, regex string) error {
+	checkPRStatuses := func() error {
+		comments, err := client.PullRequests.GetComments(repo.FullName, issue.Number)
+		if err != nil {
+			return err
+		}
+		r := regexp.MustCompile(regex)
+		for _, comment := range comments {
+			if r.MatchString(comment.Body) {
+				return nil
+			}
+		}
+
+		return errors.New(fmt.Sprintf("Failed to find a commeent matching: %s", regex))
+	}
 	exponentialBackOff := backoff.NewExponentialBackOff()
 	exponentialBackOff.MaxElapsedTime = 1 * time.Minute
 	exponentialBackOff.MaxInterval = 5 * time.Second

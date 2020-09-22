@@ -86,8 +86,8 @@ docker-push: docker-chatbot-push docker-dashboard-push
 
 e2e-tests:
 	E2E_GIT_SERVER=http://gitea.127.0.0.1.nip.io \
-	E2E_PRIMARY_SCM_TOKEN=9c5d0365f3df6534142d7aa46f97ecde7a01e5a8 \
-	E2E_APPROVER_SCM_TOKEN=9c5d0365f3df6534142d7aa46f97ecde7a01e5a8 \
+	E2E_PRIMARY_SCM_TOKEN=b7f867372041cb4680297834a95edec0722aaf30 \
+	E2E_APPROVER_SCM_TOKEN=b7f867372041cb4680297834a95edec0722aaf30 \
 	E2E_KLOOPS_URL=http://kloops-chatbot.tools.svc.cluster.local/hook \
 	go test -v ./test/e2e/...
 

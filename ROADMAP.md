@@ -15,7 +15,7 @@ This is an incomplete list of work we hope to accomplish.
 ## Gouvernance
 
 - Better labels usage
-- Add docs about how work oraganization
+- Add docs about how oraganization works
 
 ## Documentation
 
