@@ -188,6 +188,11 @@ func (r *Repo) Clean() error {
 	return os.RemoveAll(r.dir)
 }
 
+// Dir returns the repo checkout dir.
+func (r *Repo) Dir() string {
+	return r.dir
+}
+
 func (r *Repo) gitCommand(arg ...string) *exec.Cmd {
 	cmd := exec.Command(r.git, arg...) // #nosec
 	cmd.Dir = r.dir

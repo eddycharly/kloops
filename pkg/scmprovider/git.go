@@ -10,9 +10,14 @@ type Git struct {
 	client scm.GitService
 }
 
+// GetRef retruns the ref from repository
+func (s Git) GetRef(repo, ref string) (string, error) {
+	answer, _, err := s.client.FindRef(context.Background(), repo, ref)
+	return answer, err
+}
+
 // DeleteRef deletes the ref from repository
 func (s Git) DeleteRef(repo, ref string) error {
-	ctx := context.Background()
-	_, err := s.client.DeleteRef(ctx, repo, ref)
+	_, err := s.client.DeleteRef(context.Background(), repo, ref)
 	return err
 }
