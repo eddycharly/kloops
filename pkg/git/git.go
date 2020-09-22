@@ -104,7 +104,7 @@ func (c *client) Clone(repo string, base string, user string, token TokenFunc) (
 	pass := string(token())
 	if user != "" && pass != "" {
 		host := gitHost(base)
-		base = fmt.Sprintf("https://%s:%s@%s", user, pass, host)
+		base = fmt.Sprintf("http://%s:%s@%s", user, pass, host)
 	}
 	cache := filepath.Join(c.dir, repo) + ".git"
 	if _, err := os.Stat(cache); os.IsNotExist(err) {
@@ -279,9 +279,10 @@ func (r *Repo) Push(repo, branch string) error {
 	}
 	r.logger.WithValues("user", r.user, "repo", repo, "branch", branch).Info("Pushing")
 	host := gitHost(r.base)
-	remote := fmt.Sprintf("https://%s:%s@%s/%s/%s", r.user, r.pass, host, r.user, repo)
+	remote := fmt.Sprintf("http://%s:%s@%s/%s/%s", r.user, r.pass, host, r.user, repo)
 	co := r.gitCommand("push", remote, branch)
-	_, err := co.CombinedOutput()
+	msg, err := co.CombinedOutput()
+	fmt.Println(string(msg))
 	return err
 }
 

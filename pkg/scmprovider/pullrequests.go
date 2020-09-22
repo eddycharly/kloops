@@ -30,6 +30,28 @@ func (s PullRequests) CreateComment(repo string, number int, comment string) err
 	return nil
 }
 
+func (s PullRequests) GetComments(repo string, number int) ([]*scm.Comment, error) {
+	ctx := context.Background()
+	var allComments []*scm.Comment
+	var resp *scm.Response
+	var comments []*scm.Comment
+	var err error
+	firstRun := false
+	opts := scm.ListOptions{
+		Page: 1,
+	}
+	for !firstRun || (resp != nil && opts.Page <= resp.Page.Last) {
+		comments, resp, err = s.client.ListComments(ctx, repo, number, opts)
+		if err != nil {
+			return nil, err
+		}
+		firstRun = true
+		allComments = append(allComments, comments...)
+		opts.Page++
+	}
+	return allComments, nil
+}
+
 func (s PullRequests) AddLabel(repo string, number int, label string) error {
 	ctx := context.Background()
 	_, err := s.client.AddLabel(ctx, repo, number, label)
