@@ -196,6 +196,11 @@ func (r *Repo) Dir() string {
 	return r.dir
 }
 
+// Name returns the repo name.
+func (r *Repo) Name() string {
+	return r.repo
+}
+
 func (r *Repo) gitCommand(arg ...string) *exec.Cmd {
 	cmd := exec.Command(r.git, arg...) // #nosec
 	cmd.Dir = r.dir
@@ -282,7 +287,7 @@ func (r *Repo) Push(repo, branch string) error {
 	}
 	r.logger.WithValues("user", r.user, "repo", repo, "branch", branch).Info("Pushing")
 	scheme, host := gitHostAndScheme(r.base)
-	remote := fmt.Sprintf("%s://%s:%s@%s/%s/%s", scheme, r.user, r.pass, host, r.user, repo)
+	remote := fmt.Sprintf("%s://%s:%s@%s/%s", scheme, r.user, r.pass, host, repo)
 	co := r.gitCommand("push", remote, branch)
 	msg, err := co.CombinedOutput()
 	fmt.Println(string(msg))

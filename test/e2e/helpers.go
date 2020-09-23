@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"testing"
 	"time"
@@ -330,52 +329,6 @@ func CreateWebHook(scmClient *scm.Client, repo *scm.Repository, hmacToken string
 	}
 	_, _, err := scmClient.Repositories.CreateHook(context.Background(), repo.FullName, input)
 	return err
-}
-
-func WaitForPullRequestComment(client *scmprovider.Client, pr *scm.PullRequest, regex string) error {
-	gomega.Expect(pr.Sha).ShouldNot(gomega.Equal(""))
-	repo := pr.Repository()
-	checkPRStatuses := func() error {
-		comments, err := client.PullRequests.GetComments(repo.FullName, pr.Number)
-		if err != nil {
-			return err
-		}
-		r := regexp.MustCompile(regex)
-		for _, comment := range comments {
-			if r.MatchString(comment.Body) {
-				return nil
-			}
-		}
-
-		return errors.New(fmt.Sprintf("Failed to find a commeent matching: %s", regex))
-	}
-	exponentialBackOff := backoff.NewExponentialBackOff()
-	exponentialBackOff.MaxElapsedTime = 1 * time.Minute
-	exponentialBackOff.MaxInterval = 5 * time.Second
-	exponentialBackOff.Reset()
-	return backoff.Retry(checkPRStatuses, exponentialBackOff)
-}
-
-func WaitForIssueComment(client *scmprovider.Client, repo *scm.Repository, issue *scm.Issue, regex string) error {
-	checkPRStatuses := func() error {
-		comments, err := client.PullRequests.GetComments(repo.FullName, issue.Number)
-		if err != nil {
-			return err
-		}
-		r := regexp.MustCompile(regex)
-		for _, comment := range comments {
-			if r.MatchString(comment.Body) {
-				return nil
-			}
-		}
-
-		return errors.New(fmt.Sprintf("Failed to find a commeent matching: %s", regex))
-	}
-	exponentialBackOff := backoff.NewExponentialBackOff()
-	exponentialBackOff.MaxElapsedTime = 1 * time.Minute
-	exponentialBackOff.MaxInterval = 5 * time.Second
-	exponentialBackOff.Reset()
-	return backoff.Retry(checkPRStatuses, exponentialBackOff)
 }
 
 // ApplyConfigAndPluginsConfigMaps takes the config and plugins and creates/applies the config maps in the cluster using kubectl
