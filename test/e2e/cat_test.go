@@ -29,8 +29,7 @@ func CatTests() bool {
 		var (
 			server  string
 			admin   user
-			tokenid int64
-			token   string
+			token   *scm.UserToken
 			org     *scm.Organization
 			orgRepo *scm.Repository
 			gitRepo *git.Repo
@@ -38,18 +37,18 @@ func CatTests() bool {
 		BeforeSuite(func() {
 			server = GetGitServerURL()
 			admin = SetupBasicAuthUser(server, "gitea", "admin")
-			tokenid, token = admin.CreateToken("kloops")
+			token = admin.CreateToken("kloops")
 			org = admin.CreateOrganization("kloops-test")
 			orgRepo = admin.CreateRepository(org.Name, "kloops-test")
 			gitRepo = admin.CloneRepository(server, orgRepo.FullName)
 			hmacToken := SetupHmac()
 			admin.CreateWebhook(orgRepo, hmacToken)
 			InitRepository(gitRepo, "master")
-			SetupConfig(orgRepo, ns, hmacToken, token)
+			SetupConfig(orgRepo, ns, hmacToken, token.Token)
 		})
 		AfterSuite(func() {
 			gitRepo.Clean()
-			admin.DeleteToken(tokenid)
+			admin.DeleteToken(token.ID)
 			admin.DeleteRepository(orgRepo.FullName)
 			admin.DeleteOrganization(org.Name)
 		})

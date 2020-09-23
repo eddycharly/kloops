@@ -152,10 +152,11 @@ func (u user) CreateOrganization(name string) *scm.Organization {
 	return org
 }
 
-func (u user) CreateToken(name string) (int64, string) {
-	id, token, _, err := u.client.Users.CreateToken(context.Background(), u.name, name)
+func (u user) CreateToken(name string) *scm.UserToken {
+	token, _, err := u.client.Users.CreateToken(context.Background(), u.name, name)
 	Expect(err).ShouldNot(HaveOccurred())
-	return id, token
+	Expect(token).ShouldNot(BeNil())
+	return token
 }
 
 func (u user) DeleteToken(id int64) {
@@ -256,7 +257,7 @@ func SetupBasicAuthUser(server, name, password string) user {
 	u, err := url.Parse(server)
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(u).ShouldNot(BeNil())
-	client, err := factory.NewBasic(kind, server, name, password)
+	client, err := factory.NewClientWithBasicAuth(kind, server, name, password)
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(client).ShouldNot(BeNil())
 	gitClient, err := git.NewClientWithDir("/Users/charlesbreteche/Documents/dev/eddycharly/kloops/tempo")
