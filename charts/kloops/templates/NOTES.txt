@@ -1,0 +1,5 @@
+KLoops has been installed successfully.
+
+To verify pods have started, run:
+
+  kubectl --namespace={{ .Release.Namespace }} get pods -l "app.kubernetes.io/part-of=kloops,app.kubernetes.io/instance={{ .Release.Name }}"
