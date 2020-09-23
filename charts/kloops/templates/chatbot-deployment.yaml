@@ -3,16 +3,21 @@ kind: Deployment
 metadata:
   name: {{ template "chatbot.name" . }}
   labels:
-    app: {{ template "chatbot.name" . }}
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "chatbot" | nindent 4 }}
+    {{- include "labels.version" . | nindent 4 }}
 spec:
   replicas: {{ .Values.chatbot.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "chatbot.name" . }}
+      {{- include "labels.base" . | nindent 6 }}
+      {{- include "labels.component" "chatbot" | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ template "chatbot.name" . }}
+        {{- include "labels.base" . | nindent 8 }}
+        {{- include "labels.component" "chatbot" | nindent 8 }}
+        {{- include "labels.version" . | nindent 8 }}
     spec:
       serviceAccountName: {{ template "chatbot.name" . }}
       containers:

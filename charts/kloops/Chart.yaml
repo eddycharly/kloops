@@ -3,4 +3,5 @@ description: |
   This chart bootstraps installation of [KLoops](https://github.com/eddycharly/kloops).
 name: kloops
 version: 0.0.1
+appVersion: v0.0.1
 home: https://github.com/eddycharly/kloops

@@ -2,6 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ template "chatbot.name" . }}
+  labels:
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "chatbot" | nindent 4 }}
+    {{- include "labels.version" . | nindent 4 }}
   annotations:
     {{- toYaml .Values.chatbot.service.annotations | nindent 4 }}
 spec:
@@ -12,4 +16,5 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: {{ template "chatbot.name" . }}
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "chatbot" | nindent 4 }}

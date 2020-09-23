@@ -3,6 +3,10 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ template "dashboard.name" . }}
+  labels:
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "dashboard" | nindent 4 }}
+    {{- include "labels.version" . | nindent 4 }}
   annotations:
     {{- toYaml .Values.dashboard.ingress.annotations | nindent 4 }}
 spec:

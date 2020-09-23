@@ -2,3 +2,7 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: {{ template "dashboard.name" . }}
+  labels:
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "dashboard" | nindent 4 }}
+    {{- include "labels.version" . | nindent 4 }}

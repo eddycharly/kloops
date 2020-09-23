@@ -2,14 +2,19 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ template "dashboard.name" . }}
+  labels:
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "dashboard" | nindent 4 }}
+    {{- include "labels.version" . | nindent 4 }}
   annotations:
     {{- toYaml .Values.dashboard.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.dashboard.service.type }}
   ports:
-  - port: {{ .Values.dashboard.service.externalPort }}
-    targetPort: {{ .Values.dashboard.service.internalPort }}
-    protocol: TCP
-    name: http
+    - port: {{ .Values.dashboard.service.externalPort }}
+      targetPort: {{ .Values.dashboard.service.internalPort }}
+      protocol: TCP
+      name: http
   selector:
-    app: {{ template "dashboard.name" . }}
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "dashboard" | nindent 4 }}

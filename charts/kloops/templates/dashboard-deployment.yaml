@@ -3,16 +3,21 @@ kind: Deployment
 metadata:
   name: {{ template "dashboard.name" . }}
   labels:
-    app: {{ template "dashboard.name" . }}
+    {{- include "labels.base" . | nindent 4 }}
+    {{- include "labels.component" "dashboard" | nindent 4 }}
+    {{- include "labels.version" . | nindent 4 }}
 spec:
   replicas: {{ .Values.dashboard.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "dashboard.name" . }}
+      {{- include "labels.base" . | nindent 6 }}
+      {{- include "labels.component" "dashboard" | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ template "dashboard.name" . }}
+        {{- include "labels.base" . | nindent 8 }}
+        {{- include "labels.component" "dashboard" | nindent 8 }}
+        {{- include "labels.version" . | nindent 8 }}
     spec:
       serviceAccountName: {{ template "dashboard.name" . }}
       containers:
