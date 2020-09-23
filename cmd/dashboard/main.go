@@ -21,6 +21,7 @@ import (
 	"os"
 
 	configv1alpha1 "github.com/eddycharly/kloops/api/v1alpha1"
+	_ "github.com/eddycharly/kloops/pkg/chatbot/pluginimports"
 	"github.com/eddycharly/kloops/pkg/dashboard/server"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"

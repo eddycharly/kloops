@@ -183,7 +183,7 @@ func (cmd *Command) GetRegex() *regexp.Regexp {
 	if cmd.regex != nil {
 		return cmd.regex
 	}
-	re := "(?mi)^/(?:lh-)?"
+	re := "(?mi)^/(?:kl-)?"
 	if cmd.Prefix != "" {
 		re += "(" + cmd.Prefix + ")?"
 	}
@@ -225,13 +225,13 @@ func (cmd Command) FilterAndGetMatches(event *GenericCommentEvent) ([]CommandMat
 func (cmd Command) GetHelp() pluginhelp.Command {
 	var examples []string
 	for _, name := range strings.Split(cmd.Name, "|") {
-		examples = append(examples, "/"+name, "/lh-"+name)
+		examples = append(examples, "/"+name, "/kl-"+name)
 	}
-	usage := "/[lh-]"
+	usage := "/[kl-]"
 	if cmd.Prefix != "" {
 		usage += "[" + cmd.Prefix + "]"
 		for _, name := range strings.Split(cmd.Name, "|") {
-			examples = append(examples, "/"+cmd.Prefix+name, "/lh-"+cmd.Prefix+name)
+			examples = append(examples, "/"+cmd.Prefix+name, "/kl-"+cmd.Prefix+name)
 		}
 	}
 	usage += cmd.Name

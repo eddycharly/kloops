@@ -21,18 +21,18 @@ package pluginhelp
 // Command is a serializable representation of the command information for a single command.
 type Command struct {
 	// Usage is a usage string for the command.
-	Usage string
+	Usage string `json:"usage"`
 	// Featured is a flag for featured/highlight plugins.
-	Featured bool
+	Featured bool `json:"featured"`
 	// Description is a short description about what does the command do.
-	Description string
+	Description string `json:"description"`
 	// Examples is a list of usage example for the command.
-	Examples []string
+	Examples []string `json:"examples"`
 	// WhoCanUse is a description of the permissions/role/authorization required to use the command.
 	// This is usually specified as a github permissions, but it can also be a github team, an
 	// OWNERS file alias, etc.
 	// This field may include HTML.
-	WhoCanUse string
+	WhoCanUse string `json:"whoCanUse"`
 }
 
 // PluginHelp is a serializable representation of the help information for a single plugin.
@@ -40,18 +40,21 @@ type Command struct {
 type PluginHelp struct {
 	// Description is a description of what the plugin does and what purpose it achieves.
 	// This field may include HTML.
-	Description string
+	ShortDescription string `json:"shortDescription,omitempty"`
+	// Description is a description of what the plugin does and what purpose it achieves.
+	// This field may include HTML.
+	Description string `json:"description"`
 	// ExcludedProviders is the list of scm providers that are not supported by a plugin.
-	ExcludedProviders []string
+	ExcludedProviders []string `json:"excludedProviders,omitempty"`
 	// Config is a map from org/repo strings to a string describing the configuration for that repo.
 	// The key "" should map to a string describing configuration that applies to all repos if any.
 	// This configuration strings may include HTML.
-	Config map[string]string
+	Config map[string]string `json:"config,omitempty"`
 	// Events is a slice containing the events that are handled by the plugin.
 	// NOTE: Plugins do not need to populate this. Hook populates it on their behalf.
-	Events []string
+	Events []string `json:"events,omitempty"`
 	// Commands is a list of available commands of the plugin.
-	Commands []Command
+	Commands []Command `json:"commands,omitempty"`
 }
 
 // Help is a serializable representation of all plugin help information.

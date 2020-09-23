@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import {
   PluginConfig,
   PluginConfigs,
-  Plugins,
+  PluginsHelp,
   RepoConfig,
   RepoConfigs 
 } from '..';
@@ -28,7 +28,7 @@ export function Content() {
     <>
     <main className={classes.content}>
       <Switch>
-        <Route path="/help/plugins" exact component={Plugins} />
+        <Route path="/help/plugins" exact component={PluginsHelp} />
         <Route path="/config/repositories" exact component={RepoConfigs} />
         <Route path="/config/repository/:name" component={RepoConfig} />
         <Route path="/config/plugins" exact component={PluginConfigs} />

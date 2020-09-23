@@ -1,6 +1,6 @@
 export * from './Content';
 export * from './PluginConfig';
-export { default as Plugins } from './Plugins';
+export * from './PluginsHelp';
 export { default as RepoConfig } from './RepoConfig';
 export { default as RepoConfigForm } from './RepoConfigForm';
 export { default as RepoConfigs } from './RepoConfigs';

@@ -40,8 +40,9 @@ type HelpProvider func(*v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, erro
 func HelpProviders() map[string]HelpProvider {
 	pluginHelp := make(map[string]HelpProvider)
 	for k, v := range plugins {
+		h := v
 		pluginHelp[k] = func(config *v1alpha1.PluginConfigSpec) (*pluginhelp.PluginHelp, error) {
-			return v.GetHelp(config)
+			return h.GetHelp(config)
 		}
 	}
 	return pluginHelp

@@ -42,6 +42,8 @@ func (s *server) Start(addr string, port int) error {
 	// Api
 	repoConfig := handlers.NewReponConfigHandler(s.namespace, s.client, s.logger)
 	pluginConfig := handlers.NewPluginConfigHandler(s.namespace, s.client, s.logger)
+	pluginHelp := handlers.NewPluginHelpHandler(s.logger)
+	r.HandleFunc("/api/pluginhelp", pluginHelp.List).Methods("GET")
 	r.HandleFunc("/api/plugins", pluginConfig.List).Methods("GET")
 	r.HandleFunc("/api/plugins/{name}", pluginConfig.Get).Methods("GET")
 	// r.HandleFunc("/api/plugins", pluginConfig.Create).Methods("POST")

@@ -7,7 +7,6 @@ import (
 	"github.com/eddycharly/kloops/pkg/git"
 	"github.com/jenkins-x/go-scm/scm"
 	. "github.com/onsi/ginkgo"
-	// . "github.com/onsi/gomega"
 )
 
 const (
