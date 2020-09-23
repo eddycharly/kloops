@@ -18,8 +18,7 @@ import {
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: theme.spacing(2),
-    padding: theme.spacing(2),
+    margin: theme.spacing(1),
   },
   heading: {
     flexBasis: '33.33%',
@@ -48,13 +47,23 @@ export function PluginsHelp() {
     return null;
   }
 
+  const getShortHelp = (pluginHelp: PluginHelp)=>{
+    if (pluginHelp.shortDescription){
+      return pluginHelp.shortDescription;
+    }
+    if (pluginHelp.description){
+      return pluginHelp.description.split(".")[0];
+    }
+    return "No description";
+  }
+
   return (
-    <div>
+    <div className={classes.root}>
       {Object.entries(items).map(([key, value]) => (
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h5" color="primary" className={classes.heading}>{key}</Typography>
-            <Typography className={classes.secondaryHeading}>{value.description.split(".")[0]}</Typography>
+            <Typography className={classes.secondaryHeading}>{getShortHelp(value)}</Typography>
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
             <Typography variant="h5">Description</Typography>

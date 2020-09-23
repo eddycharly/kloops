@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function SideNav(props: any) {
+export function SideNav(props: any) {
   const classes = useStyles();
 
   return (
@@ -90,5 +90,3 @@ function SideNav(props: any) {
     </Drawer>
   );
 }
-
-export default SideNav;

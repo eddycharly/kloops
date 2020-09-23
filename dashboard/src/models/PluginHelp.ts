@@ -7,6 +7,7 @@ export interface Command {
 }
 
 export interface PluginHelp {
+    shortDescription: string;
     description: string;
     excludedProviders?: Array<string>;
     config?: { [name: string]: string };

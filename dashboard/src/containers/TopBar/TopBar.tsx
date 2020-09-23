@@ -1,21 +1,17 @@
 import React from 'react';
-// import { connect } from 'react-redux';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   AppBar,
-  Avatar,
   IconButton,
   LinearProgress,
+  Link,
   Toolbar,
   Typography
 } from '@material-ui/core';
-
 import {
   Menu as MenuIcon
 } from '@material-ui/icons';
-
-// import { isFetching } from '../../reducers';
 
 const drawerWidth = 240;
 
@@ -47,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function TopBar(props: any) {
+export function TopBar(props: any) {
   const classes = useStyles();
 
   return (
@@ -62,10 +58,10 @@ function TopBar(props: any) {
         >
           <MenuIcon />
         </IconButton>
-        <img src="logo.png" alt="logo" className={classes.logo} />
-        <Typography variant="h6" noWrap>
-          KLOOPS
-      </Typography>
+        <Link href="#/">
+          <img src="logo.png" alt="logo" className={classes.logo} />
+        </Link>
+        <Typography variant="h6" noWrap><Link href="#/" color="inherit" underline="none">KLOOPS</Link></Typography>
       </Toolbar>
       {props.isFetching && (
         <LinearProgress />
@@ -73,12 +69,3 @@ function TopBar(props: any) {
     </AppBar>
   );
 }
-
-// function mapStateToProps(state: any) {
-//   return {
-//     isFetching: isFetching(state)
-//   };
-// }
-
-// export default connect(mapStateToProps, null)(TopBar);
-export default TopBar;
