@@ -105,3 +105,6 @@ CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+gen-docs-commands:
+	go run ./scripts/gen-docs/commands.go > ./docs/plugins/COMMANDS.md

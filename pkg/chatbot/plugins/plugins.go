@@ -55,3 +55,8 @@ func GetPlugin(name string) (*Plugin, error) {
 	}
 	return nil, fmt.Errorf("plugin %s not found", name)
 }
+
+// GetPlugins returns the plugins map
+func GetPlugins() map[string]Plugin {
+	return plugins
+}
