@@ -42,7 +42,7 @@ helm uninstall kloops --namespace kloops
 
 ## Version
 
-Current chart version is `0.0.1`
+Current chart version is `0.0.2`
 
 ## Values
 
