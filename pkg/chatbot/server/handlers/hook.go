@@ -7,22 +7,24 @@ import (
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/events"
 	"github.com/eddycharly/kloops/pkg/git"
-	utils "github.com/eddycharly/kloops/pkg/utils/logr"
-	utilsrepoconfig "github.com/eddycharly/kloops/pkg/utils/repoconfig"
+	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/gorilla/mux"
+	"github.com/jenkins-x/go-scm/scm"
+	"github.com/jenkins-x/go-scm/scm/factory"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type hookHandler struct {
-	client client.Client
-	logger logr.Logger
-	events events.Events
+	namespace string
+	client    client.Client
+	logger    logr.Logger
+	events    events.Events
 }
 
-func NewHookHandler(client client.Client, logger logr.Logger) http.Handler {
+func NewHookHandler(namespace string, client client.Client, logger logr.Logger) http.Handler {
 	logger = logger.WithName("HookHandler")
 	gitClient, err := git.NewClientWithDir("./tempo")
 	if err != nil {
@@ -30,9 +32,10 @@ func NewHookHandler(client client.Client, logger logr.Logger) http.Handler {
 		fmt.Println(err)
 	}
 	return &hookHandler{
-		client: client,
-		logger: logger,
-		events: events.NewEvents(client, gitClient, logger),
+		namespace: namespace,
+		client:    client,
+		logger:    logger,
+		events:    events.NewEvents(client, gitClient, logger),
 	}
 }
 
@@ -40,20 +43,34 @@ func (h *hookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	vars := mux.Vars(r)
 	logger := h.logger.WithValues(utils.MapValues(vars)...).WithValues("method", r.Method)
-	if r.Method != http.MethodPost {
-		logger.Info("invalid http method so returning 200")
+	provider := vars["provider"]
+	if service, err := factory.NewWebHookService(provider); err != nil {
+		logger.Error(err, "error creating webhooks service")
 	} else {
-		nn := types.NamespacedName{
-			Namespace: vars["namespace"],
-			Name:      vars["repo"],
-		}
 		var repoConfig v1alpha1.RepoConfig
-		if err := h.client.Get(r.Context(), nn, &repoConfig); err != nil {
-			if apierrors.IsNotFound(err) {
-				logger.Error(err, "resource not found in the cluster")
-			} else {
-				logger.Error(err, "error getting resource in the cluster")
+		var nn types.NamespacedName
+		if webhook, err := service.Parse(r, func(webhook scm.Webhook) (string, error) {
+			nn = types.NamespacedName{
+				Namespace: h.namespace,
+				Name:      webhook.Repository().Name,
 			}
+			if err := h.client.Get(r.Context(), nn, &repoConfig); err != nil {
+				if apierrors.IsNotFound(err) {
+					logger.Error(err, "resource not found in the cluster")
+				} else {
+					logger.Error(err, "error getting resource in the cluster")
+				}
+				return "", err
+			}
+			// TODO gitea hard coded
+			hmac, err := utils.GetSecret(h.client, repoConfig.Namespace, repoConfig.Spec.Gitea.HmacToken)
+			if err != nil {
+				logger.Error(err, "error getting hmac token")
+				return "", err
+			}
+			return string(hmac), nil
+		}); err != nil {
+			logger.Error(err, "failed to parse web hook")
 		} else {
 			pluginConfigSpec := repoConfig.Spec.PluginConfig.Spec
 			if pluginConfigSpec == nil {
@@ -69,14 +86,20 @@ func (h *hookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			if pluginConfigSpec != nil {
-				if event, scmClient, err := utilsrepoconfig.ParseWebhook(h.client, r, &repoConfig); err != nil {
-					logger.Error(err, "failed to parse web hook")
+				token, err := utils.GetSecret(h.client, repoConfig.Namespace, repoConfig.Spec.Gitea.Token)
+				if err != nil {
+					logger.Error(err, "error getting oauth token")
 				} else {
-					if output, err := h.events.ProcessWebHook(&repoConfig, pluginConfigSpec, scmClient, event); err != nil {
-						logger.Error(err, "failed to process web hook")
+					scmClient, err := factory.NewClient(provider, repoConfig.Spec.Gitea.ServerURL, string(token))
+					if err != nil {
+						logger.Error(err, "error creating scm client")
 					} else {
-						if _, err = w.Write([]byte(output)); err != nil {
-							logger.Error(err, "failed to write response")
+						if output, err := h.events.ProcessWebHook(&repoConfig, pluginConfigSpec, scmClient, webhook); err != nil {
+							logger.Error(err, "failed to process web hook")
+						} else {
+							if _, err = w.Write([]byte(output)); err != nil {
+								logger.Error(err, "failed to write response")
+							}
 						}
 					}
 				}

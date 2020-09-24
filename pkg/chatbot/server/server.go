@@ -11,21 +11,23 @@ import (
 )
 
 const helpRoute = "/help/{namespace}/{repo}"
-const hookRoute = "/hook/{namespace}/{repo}"
+const hookRoute = "/hook/{provider}"
 
 type Server interface {
 	Start(addr string, port int) error
 }
 
 type server struct {
-	client client.Client
-	logger logr.Logger
+	namespace string
+	client    client.Client
+	logger    logr.Logger
 }
 
-func NewServer(client client.Client, logger logr.Logger) Server {
+func NewServer(namespace string, client client.Client, logger logr.Logger) Server {
 	return &server{
-		client: client,
-		logger: logger.WithName("Server"),
+		namespace: namespace,
+		client:    client,
+		logger:    logger.WithName("Server"),
 	}
 }
 
@@ -34,6 +36,6 @@ func (s *server) Start(addr string, port int) error {
 	logger.Info("starting server ...")
 	r := mux.NewRouter()
 	r.Handle(helpRoute, handlers.NewHelpHandler(s.client, logger))
-	r.Handle(hookRoute, handlers.NewHookHandler(s.client, logger))
+	r.Handle(hookRoute, handlers.NewHookHandler(s.namespace, s.client, logger)).Methods("POST")
 	return http.ListenAndServe(fmt.Sprintf("%s:%d", addr, port), r)
 }

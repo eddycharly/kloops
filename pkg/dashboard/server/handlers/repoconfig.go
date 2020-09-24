@@ -7,6 +7,7 @@ import (
 
 	"github.com/eddycharly/kloops/api/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/dashboard/server/models"
+	"github.com/eddycharly/kloops/pkg/utils"
 	utilsrepoconfig "github.com/eddycharly/kloops/pkg/utils/repoconfig"
 	"github.com/go-logr/logr"
 	"github.com/gorilla/mux"
@@ -84,7 +85,7 @@ func (h *RepoconfigHandler) Hook(w http.ResponseWriter, r *http.Request) {
 			h.logger.Error(err, "failed to get scm client")
 		} else {
 			// TODO not always gitea...
-			hmac, _ := utilsrepoconfig.GetSecret(h.client, item.Namespace, item.Spec.Gitea.HmacToken)
+			hmac, _ := utils.GetSecret(h.client, item.Namespace, item.Spec.Gitea.HmacToken)
 			hook := scm.HookInput{
 				Target:     fmt.Sprintf("http://kloops-chatbot.tools.svc.cluster.local/hook/%s/%s", key.Namespace, key.Name),
 				Name:       key.Name,

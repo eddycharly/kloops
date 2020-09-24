@@ -2,9 +2,9 @@ package utils
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/go-scm/scm/factory"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -12,7 +12,7 @@ import (
 
 func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, string, string, scm.SecretFunc, error) {
 	if repoConfig.Spec.GitHub != nil {
-		token, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.Token)
+		token, err := utils.GetSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.Token)
 		if err != nil {
 			return "", "", "", nil, errors.New("failed to read token")
 		}
@@ -20,7 +20,7 @@ func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, st
 			repoConfig.Spec.GitHub.ServerURL,
 			string(token),
 			func(scm.Webhook) (string, error) {
-				hmac, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.HmacToken)
+				hmac, err := utils.GetSecret(client, repoConfig.Namespace, repoConfig.Spec.GitHub.HmacToken)
 				if err != nil {
 					return "", err
 				}
@@ -28,7 +28,7 @@ func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, st
 			},
 			nil
 	} else if repoConfig.Spec.Gitea != nil {
-		token, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.Token)
+		token, err := utils.GetSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.Token)
 		if err != nil {
 			return "", "", "", nil, errors.New("failed to read token")
 		}
@@ -36,7 +36,7 @@ func ScmInfos(client client.Client, repoConfig *v1alpha1.RepoConfig) (string, st
 			repoConfig.Spec.Gitea.ServerURL,
 			string(token),
 			func(scm.Webhook) (string, error) {
-				hmac, err := GetSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.HmacToken)
+				hmac, err := utils.GetSecret(client, repoConfig.Namespace, repoConfig.Spec.Gitea.HmacToken)
 				if err != nil {
 					return "", err
 				}
@@ -57,16 +57,4 @@ func ScmClient(client client.Client, repoConfig *v1alpha1.RepoConfig) (*scm.Clie
 		return nil, nil, err
 	}
 	return scmClient, secretFunc, nil
-}
-
-func ParseWebhook(client client.Client, request *http.Request, repoConfig *v1alpha1.RepoConfig) (scm.Webhook, *scm.Client, error) {
-	scmClient, secretFunc, err := ScmClient(client, repoConfig)
-	if err != nil {
-		return nil, nil, err
-	}
-	webHook, err := scmClient.Webhooks.Parse(request, secretFunc)
-	if err != nil {
-		return nil, nil, err
-	}
-	return webHook, scmClient, nil
 }

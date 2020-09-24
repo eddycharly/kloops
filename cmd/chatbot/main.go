@@ -61,7 +61,7 @@ func main() {
 	// +kubebuilder:scaffold:builder
 	stopCh := ctrl.SetupSignalHandler()
 
-	server := server.NewServer(mgr.GetClient(), ctrl.Log)
+	server := server.NewServer(namespace, mgr.GetClient(), ctrl.Log)
 
 	go func() {
 		if err := server.Start("", 8090); err != nil {

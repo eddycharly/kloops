@@ -137,7 +137,7 @@ func GetApproverSCMToken() (string, error) {
 
 // GetWebhookURL the webhooks url
 func GetWebhookURL(repo *scm.Repository) string {
-	return fmt.Sprintf("%s/%s/%s", os.Getenv(kloopsURLEnvVar), "tools", repo.Name)
+	return fmt.Sprintf("%s/gitea", os.Getenv(kloopsURLEnvVar))
 }
 
 func getSCMToken(envName, gitKind string) (string, error) {
