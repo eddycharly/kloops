@@ -26,4 +26,4 @@ This is an incomplete list of work we hope to accomplish.
 ## Community
 
 - Create KLoops slack
-- Create issue templates
+- ~~Create issue templates~~
