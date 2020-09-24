@@ -1,17 +1,11 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Moment from 'react-moment';
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Fab,
-    IconButton,
-    Paper,
     Table,
     TableBody,
     TableCell,
-    TableHead,
     TableRow,
     Typography
 } from '@material-ui/core';
@@ -29,19 +23,6 @@ import {
 import {
     ExpandMore as ExpandMoreIcon
 } from '@material-ui/icons';
-
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        margin: theme.spacing(2),
-        padding: theme.spacing(2),
-        height: "100%",
-    },
-    fab: {
-        position: 'absolute',
-        bottom: theme.spacing(4),
-        right: theme.spacing(4),
-    },
-}));
 
 interface secretProps {
     subject: SecretSubject
@@ -178,7 +159,6 @@ interface props {
 }
 
 export function PluginConfig({ match }: props) {
-    const classes = useStyles();
     const [subject, setSubject] = React.useState<Subject | null>(null);
 
     React.useEffect(() => {

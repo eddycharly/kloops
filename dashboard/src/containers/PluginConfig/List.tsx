@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
+import { UseStyles } from '..';
 import Moment from 'react-moment';
 import {
     Fab,
@@ -26,21 +26,8 @@ import {
     PluginConfig
 } from '../../models';
 
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        margin: theme.spacing(2),
-        padding: theme.spacing(2),
-        height: "100%",
-    },
-    fab: {
-        position: 'absolute',
-        bottom: theme.spacing(4),
-        right: theme.spacing(4),
-    },
-}));
-
 export function PluginConfigs() {
-    const classes = useStyles();
+    const classes = UseStyles();
     const [items, setItems] = React.useState<Array<PluginConfig>>([]);
 
     React.useEffect(() => {

@@ -46,7 +46,6 @@ func CatTests() bool {
 			SetupConfig(orgRepo, ns, hmacToken, token.Token)
 		})
 		AfterSuite(func() {
-			gitRepo.Clean()
 			admin.DeleteToken(token.ID)
 			admin.DeleteRepository(orgRepo.FullName)
 			admin.DeleteOrganization(org.Name)
@@ -60,12 +59,20 @@ func CatTests() bool {
 				SetupBranch(gitRepo, "master", branch)
 				pr = admin.CreatePullRequest(orgRepo.FullName, branch, "master", prTitle, prBody)
 			})
-			It("Checks /meow works", func() {
+			It("Checks '/meow' works", func() {
 				admin.CreateComment(orgRepo.FullName, "/meow", pr.Number, true)
 				WaitForComment(admin.client, orgRepo.FullName, pr.Number, true, `!\[cat image\]`)
 			})
-			It("Checks /meowvie works", func() {
+			It("Checks '/meowvie' works", func() {
 				admin.CreateComment(orgRepo.FullName, "/meowvie", pr.Number, true)
+				WaitForComment(admin.client, orgRepo.FullName, pr.Number, true, `!\[cat image\]`)
+			})
+			It("Checks '/kl-meow' works", func() {
+				admin.CreateComment(orgRepo.FullName, "/kl-meow", pr.Number, true)
+				WaitForComment(admin.client, orgRepo.FullName, pr.Number, true, `!\[cat image\]`)
+			})
+			It("Checks '/kl-meowvie' works", func() {
+				admin.CreateComment(orgRepo.FullName, "/kl-meowvie", pr.Number, true)
 				WaitForComment(admin.client, orgRepo.FullName, pr.Number, true, `!\[cat image\]`)
 			})
 		})
@@ -74,12 +81,20 @@ func CatTests() bool {
 			BeforeEach(func() {
 				issue = admin.CreateIssue(orgRepo.FullName, issueTitle, issueBody)
 			})
-			It("Checks /meow works", func() {
+			It("Checks '/meow' works", func() {
 				admin.CreateComment(orgRepo.FullName, "/meow", issue.Number, true)
 				WaitForComment(admin.client, orgRepo.FullName, issue.Number, true, `!\[cat image\]`)
 			})
-			It("Checks /meowvie works", func() {
+			It("Checks '/meowvie' works", func() {
 				admin.CreateComment(orgRepo.FullName, "/meowvie", issue.Number, true)
+				WaitForComment(admin.client, orgRepo.FullName, issue.Number, true, `!\[cat image\]`)
+			})
+			It("Checks '/kl-meow' works", func() {
+				admin.CreateComment(orgRepo.FullName, "/kl-meow", issue.Number, true)
+				WaitForComment(admin.client, orgRepo.FullName, issue.Number, true, `!\[cat image\]`)
+			})
+			It("Checks '/kl-meowvie' works", func() {
+				admin.CreateComment(orgRepo.FullName, "/kl-meowvie", issue.Number, true)
 				WaitForComment(admin.client, orgRepo.FullName, issue.Number, true, `!\[cat image\]`)
 			})
 		})

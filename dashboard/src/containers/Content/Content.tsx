@@ -1,6 +1,6 @@
 import React from 'react';
+import { UseStyles } from '..';
 import { Route, Switch } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
 import {
   Home,
   PluginConfig,
@@ -10,21 +10,8 @@ import {
   RepoConfigs
 } from '..';
 
-const useStyles = makeStyles((theme) => ({
-  content: {
-    flexGrow: 1,
-    height: `calc(100vh - 64px)`,
-    marginTop: "64px",
-    overflow: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: "#f4f4f4",
-  },
-}));
-
 export function Content() {
-  const classes = useStyles();
-
+  const classes = UseStyles();
   return (
     <>
       <main className={classes.content}>
