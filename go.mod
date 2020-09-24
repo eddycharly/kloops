@@ -7,7 +7,7 @@ require (
 	github.com/go-logr/logr v0.2.1
 	github.com/gorilla/mux v1.8.0
 	github.com/jenkins-x/go-scm v1.5.175
-	github.com/onsi/ginkgo v1.12.1
+	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.1
 	github.com/pkg/errors v0.9.1
 	gopkg.in/yaml.v2 v2.3.0
