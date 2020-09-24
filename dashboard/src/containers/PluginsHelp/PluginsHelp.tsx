@@ -4,6 +4,10 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Grid,
+  List,
+  ListItemText,
+  ListItem,
   Typography
 } from '@material-ui/core';
 import {
@@ -47,11 +51,11 @@ export function PluginsHelp() {
     return null;
   }
 
-  const getShortHelp = (pluginHelp: PluginHelp)=>{
-    if (pluginHelp.shortDescription){
+  const getShortHelp = (pluginHelp: PluginHelp) => {
+    if (pluginHelp.shortDescription) {
       return pluginHelp.shortDescription;
     }
-    if (pluginHelp.description){
+    if (pluginHelp.description) {
       return pluginHelp.description.split(".")[0];
     }
     return "No description";
@@ -66,23 +70,41 @@ export function PluginsHelp() {
             <Typography className={classes.secondaryHeading}>{getShortHelp(value)}</Typography>
           </AccordionSummary>
           <AccordionDetails className={classes.details}>
-            <Typography variant="h5">Description</Typography>
-            {value.description}
-            {value.excludedProviders && (
-              <>
-                <Typography variant="h5">Excluded providers</Typography>
-                {value.excludedProviders}
-              </>
-            )}
-            {value.events && (
-              <>
-                <Typography variant="h5">Events</Typography>
-                {value.events}
-              </>
-            )}
-            {value.commands && value.commands.map(cmd => (
-              <Typography>{cmd.usage}</Typography>
-            ))}
+            <Grid container spacing={2}>
+              <Grid item xs>
+                <Typography variant="h6" color="primary">Description</Typography>
+                <Typography>{value.description}</Typography>
+              </Grid>
+              {value.excludedProviders && (
+                <Grid item xs>
+                  <Typography variant="h6" color="primary">Excluded providers</Typography>
+                  {value.excludedProviders}
+                </Grid>
+              )}
+              {value.events && (
+                <Grid item xs>
+                  <Typography variant="h6" color="primary">Events</Typography>
+                  <List>
+                    {value.events.map(x => (
+                      <ListItem><ListItemText>{x}</ListItemText></ListItem>
+                    ))}
+                  </List>
+                </Grid>
+              )}
+              {value.commands && value.commands.map(x => (
+                <Grid item xs>
+                  <Typography variant="h6" color="primary">Command</Typography>
+                  <Typography color="secondary">{x.usage}</Typography>
+                  <Typography>{x.description}</Typography>
+                  <Typography>Examples</Typography>
+                  <ul>
+                    {x.examples.map(y => (
+                      <li>{y}</li>
+                    ))}
+                  </ul>
+                </Grid>
+              ))}
+            </Grid>
           </AccordionDetails>
         </Accordion>
       ))}

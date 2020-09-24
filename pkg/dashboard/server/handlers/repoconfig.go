@@ -79,7 +79,7 @@ func (h *RepoconfigHandler) Hook(w http.ResponseWriter, r *http.Request) {
 	}
 	var item v1alpha1.RepoConfig
 	if err := h.client.Get(r.Context(), key, &item); err != nil {
-		h.logger.Error(err, "failed to list repoconfigs")
+		h.logger.Error(err, "failed to get repoconfig")
 	} else {
 		if scmClient, _, err := utilsrepoconfig.ScmClient(h.client, &item); err != nil {
 			h.logger.Error(err, "failed to get scm client")
@@ -87,7 +87,7 @@ func (h *RepoconfigHandler) Hook(w http.ResponseWriter, r *http.Request) {
 			// TODO not always gitea...
 			hmac, _ := utils.GetSecret(h.client, item.Namespace, item.Spec.Gitea.HmacToken)
 			hook := scm.HookInput{
-				Target:     fmt.Sprintf("http://kloops-chatbot.tools.svc.cluster.local/hook/%s/%s", key.Namespace, key.Name),
+				Target:     "http://kloops-chatbot.tools.svc.cluster.local/hook/gitea/",
 				Name:       key.Name,
 				Secret:     string(hmac),
 				SkipVerify: true,
