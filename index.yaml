@@ -1,0 +1,15 @@
+apiVersion: v1
+entries:
+  kloops:
+  - apiVersion: v1
+    appVersion: v0.0.1
+    created: "2020-09-24T10:44:53.78910885Z"
+    description: |
+      This chart bootstraps installation of [KLoops](https://github.com/eddycharly/kloops).
+    digest: 88746355f138a2f298a5a68e8331a05abd77d66e6114f4ee155e05c1a08c1a14
+    home: https://github.com/eddycharly/kloops
+    name: kloops
+    urls:
+    - https://github.com/eddycharly/kloops/releases/download/kloops-0.0.1/kloops-0.0.1.tgz
+    version: 0.0.1
+generated: "2020-09-24T10:44:53.713082304Z"
