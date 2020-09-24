@@ -2,7 +2,7 @@
 
 ## Creating the project from scratch
 
-1. Run `./install-kubebuilder.sh` to install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder)
+1. Run `./scripts/install-kubebuilder.sh` to install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder)
 1. Run `go mod init github.com/eddycharly/kloops`
 1. Run `kubebuilder init --domain kloops.io` to create the project
 

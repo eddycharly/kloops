@@ -69,13 +69,13 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 docker-chatbot-build: chatbot-linux
-	docker build . -t ${IMG}-chatbot:${TAG} -f Dockerfile.chatbot
+	docker build . -t ${IMG}-chatbot:${TAG} -f .docker/Dockerfile.chatbot
 
 docker-chatbot-push: docker-chatbot-build
 	docker push ${IMG}-chatbot:${TAG}
 
 docker-dashboard-build: dashboard-linux dashboard-front
-	docker build . -t ${IMG}-dashboard:${TAG} -f Dockerfile.dashboard
+	docker build . -t ${IMG}-dashboard:${TAG} -f .docker/Dockerfile.dashboard
 
 docker-dashboard-push: docker-dashboard-build
 	docker push ${IMG}-dashboard:${TAG}
