@@ -82,6 +82,9 @@ export function SideNav(props: any) {
           <ListItem button component={Link} to="/help/plugins" onClick={props.handleDrawerClose}>
             <ListItemText primary="Plugins" />
           </ListItem>
+          <ListItem button component={Link} to="/help/commands" onClick={props.handleDrawerClose}>
+            <ListItemText primary="Commands" />
+          </ListItem>
           <ListItem button component={Link} to="/help/about" onClick={props.handleDrawerClose}>
             <ListItemText primary="About" />
           </ListItem>

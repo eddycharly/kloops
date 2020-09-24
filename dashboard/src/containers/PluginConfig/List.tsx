@@ -47,28 +47,26 @@ export function PluginConfigs() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {items.map((row) => {
-                            return (
-                                <TableRow key={row.name}>
-                                    <TableCell component="th" scope="row">
-                                        <Link to={`/config/plugin/${row.name}`}>{row.name}</Link>
-                                    </TableCell>
-                                    <TableCell component="th" scope="row">{row.namespace}</TableCell>
-                                    <TableCell><Moment fromNow>{row.creationTimestamp}</Moment></TableCell>
-                                    <TableCell>
-                                        <IconButton size="small">
-                                            <DeleteIcon />
-                                        </IconButton>
-                                        <IconButton size="small">
-                                            <FileCopyIcon />
-                                        </IconButton>
-                                        <IconButton size="small">
-                                            <RssFeedIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        })}
+                        {items && items.map((row) => (
+                            <TableRow key={row.name}>
+                                <TableCell component="th" scope="row">
+                                    <Link to={`/config/plugin/${row.name}`}>{row.name}</Link>
+                                </TableCell>
+                                <TableCell component="th" scope="row">{row.namespace}</TableCell>
+                                <TableCell><Moment fromNow>{row.creationTimestamp}</Moment></TableCell>
+                                <TableCell>
+                                    <IconButton size="small">
+                                        <DeleteIcon />
+                                    </IconButton>
+                                    <IconButton size="small">
+                                        <FileCopyIcon />
+                                    </IconButton>
+                                    <IconButton size="small">
+                                        <RssFeedIcon />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
                 <Fab color="secondary" aria-label="add" className={classes.fab}>

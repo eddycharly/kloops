@@ -71,7 +71,7 @@ function RepoConfigs() {
   const onHook = (name: string) => {
     createHook(name);
   }
-  
+
   return (
     <>
       <RepoConfigForm open={open} onClose={handleClose} />
@@ -90,18 +90,18 @@ function RepoConfigs() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((row) => {
+            {items && items.map((row) => {
               const infos = scmInfos(row);
               return (
                 <TableRow key={row.metadata.name}>
-                  <TableCell component="th" scope="row">
+                  <TableCell>
                     <Link to={`/config/repository/${row.metadata.name}`}>{row.metadata.name}</Link>
                   </TableCell>
-                  <TableCell component="th" scope="row">{row.metadata.namespace}</TableCell>
-                  <TableCell component="th" scope="row">{row.spec.botName}</TableCell>
-                  <TableCell component="th" scope="row">{infos.provider}</TableCell>
-                  <TableCell component="th" scope="row">{infos.organization}</TableCell>
-                  <TableCell component="th" scope="row">{infos.repository}</TableCell>
+                  <TableCell>{row.metadata.namespace}</TableCell>
+                  <TableCell>{row.spec.botName}</TableCell>
+                  <TableCell>{infos.provider}</TableCell>
+                  <TableCell>{infos.organization}</TableCell>
+                  <TableCell>{infos.repository}</TableCell>
                   <TableCell><Moment fromNow>{row.metadata.creationTimestamp}</Moment></TableCell>
                   <TableCell>
                     <IconButton onClick={() => onHook(row.metadata.name)} size="small">

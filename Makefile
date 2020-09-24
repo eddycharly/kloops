@@ -25,7 +25,7 @@ dashboard: generate fmt vet
 	go build -o bin/chatbot cmd/dashboard/main.go
 
 dashboard-front:
-	cd dashboard && npm install && npm run build
+	cd dashboard && CI=true npm install && npm run build
 
 chatbot-linux: generate fmt vet
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/chatbot cmd/chatbot/main.go

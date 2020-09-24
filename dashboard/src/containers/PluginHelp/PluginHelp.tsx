@@ -14,7 +14,7 @@ import {
   getPluginHelp
 } from '../../api/PluginHelp';
 import {
-  PluginHelp
+  PluginHelp as Model
 } from '../../models';
 import {
   ExpandMore as ExpandMoreIcon
@@ -39,9 +39,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function PluginsHelp() {
+export function PluginHelp() {
   const classes = useStyles();
-  const [items, setItems] = React.useState<{ [name: string]: PluginHelp } | null>(null);
+  const [items, setItems] = React.useState<{ [name: string]: Model } | null>(null);
 
   React.useEffect(() => {
     getPluginHelp().then(result => setItems(result));
@@ -51,7 +51,7 @@ export function PluginsHelp() {
     return null;
   }
 
-  const getShortHelp = (pluginHelp: PluginHelp) => {
+  const getShortHelp = (pluginHelp: Model) => {
     if (pluginHelp.shortDescription) {
       return pluginHelp.shortDescription;
     }

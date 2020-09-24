@@ -2,10 +2,11 @@ import React from 'react';
 import { UseStyles } from '..';
 import { Route, Switch } from 'react-router-dom';
 import {
+  CommandHelp,
   Home,
   PluginConfig,
   PluginConfigs,
-  PluginsHelp,
+  PluginHelp,
   RepoConfig,
   RepoConfigs
 } from '..';
@@ -17,7 +18,8 @@ export function Content() {
       <main className={classes.content}>
         <Switch>
           <Route path="/" exact component={Home} />
-          <Route path="/help/plugins" exact component={PluginsHelp} />
+          <Route path="/help/commands" exact component={CommandHelp} />
+          <Route path="/help/plugins" exact component={PluginHelp} />
           <Route path="/config/repositories" exact component={RepoConfigs} />
           <Route path="/config/repository/:name" component={RepoConfig} />
           <Route path="/config/plugins" exact component={PluginConfigs} />

@@ -20,7 +20,7 @@ export const UseStyles = makeStyles((theme) => ({
     },
     content: {
         flexGrow: 1,
-        height: `calc(100vh - 64px)`,
+        minHeight: `calc(100vh - 64px)`,
         marginTop: "64px",
         overflow: 'auto',
         display: 'flex',
