@@ -6,16 +6,16 @@
 {{- end }}
 {{ end }}
 
-# Lighthouse
+# KLoops
 
-This chart bootstraps installation of [Lighthouse](https://github.com/jenkins-x/lighthouse).
+This chart bootstraps installation of [KLoops](https://github.com/eddycharly/kloops).
 
 ## Installing
 
-- Add jenkins-x helm charts repo
+- Add kloops helm charts repo
 
 ```bash
-helm repo add jenkins-x http://chartmuseum.jenkins-x.io
+helm repo add kloops TODO
 
 helm repo update
 ```
@@ -23,12 +23,12 @@ helm repo update
 - Install (or upgrade)
 
 ```bash
-# This will install Lighthouse in the lighthouse namespace (with a my-lighthouse release name)
+# This will install KLoops in the kloops namespace (with a kloops release name)
 
 # Helm v2
-helm upgrade --install my-lighthouse --namespace lighthouse jenkins-x/lighthouse
+helm upgrade --install kloops --namespace kloops kloops/kloops
 # Helm v3
-helm upgrade --install my-lighthouse --namespace lighthouse jenkins-x/lighthouse
+helm upgrade --install kloops --namespace kloops kloops/kloops
 ```
 
 Look [below](#values) for the list of all available options and their corresponding description.
@@ -38,12 +38,12 @@ Look [below](#values) for the list of all available options and their correspond
 To uninstall the chart, simply delete the release.
 
 ```bash
-# This will uninstall Lighthouse in the lighthouse namespace (assuming a my-lighthouse release name)
+# This will uninstall KLoops in the kloops namespace (assuming a kloops release name)
 
 # Helm v2
-helm delete --purge my-lighthouse
+helm delete --purge kloops
 # Helm v3
-helm uninstall my-lighthouse --namespace lighthouse
+helm uninstall kloops --namespace kloops
 ```
 
 ## Version

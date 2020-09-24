@@ -17,7 +17,6 @@ import {
 
 export function TopBar(props: any) {
   const classes = UseStyles();
-
   return (
     <AppBar position="fixed" className={clsx(classes.appBar, props.open && classes.appBarShift)}>
       <Toolbar>
@@ -35,11 +34,11 @@ export function TopBar(props: any) {
         </Link>
         <Typography variant="h6" noWrap><Link href="#/" color="inherit" underline="none">KLOOPS</Link></Typography>
         <div className={classes.grow} />
-        <IconButton color="inherit" target="_blank" href="https://github.com/eddycharly/kloops/">
-          <GitHubIcon />
-        </IconButton>
         <IconButton color="inherit" onClick={props.handleToggleTheme}>
           <ThemeIcon />
+        </IconButton>
+        <IconButton color="inherit" target="_blank" href="https://github.com/eddycharly/kloops/">
+          <GitHubIcon />
         </IconButton>
       </Toolbar>
       {props.isFetching && (

@@ -1,55 +1,88 @@
-# logFormat -- Log format
-logFormat: "json"
-
 cluster:
   crds:
     # cluster.crds.create -- Create custom resource definitions
     create: true
 
 chatbot:
-  enabled: true
+  # chatbot.replicaCount -- Number of replicas
   replicaCount: 1
+
   image:
+    # chatbot.image.repository -- Docker image repository
     repository: eddycharly/kloops-chatbot
+
+    # chatbot.image.tag -- Docker image tag
     tag: latest
+
+    # chatbot.image.pullPolicy -- Docker image pull policy
     pullPolicy: IfNotPresent
+
+  # chatbot.service -- Service settings
   service:
     type: ClusterIP
     externalPort: 80
     internalPort: 8090
     annotations: {}
+
   resources:
+    # chatbot.resources.limits -- Pods resource limits
     limits:
       cpu: 100m
       memory: 256Mi
+
+    # chatbot.resources.requests -- Pods resource requests
     requests:
       cpu: 80m
       memory: 128Mi
+
   ingress:
+    # chatbot.ingress.enabled -- Enable ingress
     enabled: false
+
+    # chatbot.ingress.annotations -- Ingress annotations
     annotations: {}
+
+    # chatbot.ingress.hosts -- Ingress host names
     hosts: []
 
 dashboard:
-  enabled: true
+  # dashboard.replicaCount -- Number of replicas
   replicaCount: 1
+
   image:
+    # dashboard.image.repository -- Docker image repository
     repository: eddycharly/kloops-dashboard
+
+    # dashboard.image.tag -- Docker image tag
     tag: latest
+
+    # dashboard.image.pullPolicy -- Docker image pull policy
     pullPolicy: IfNotPresent
+
+  # dashboard.service -- Service settings
   service:
     type: ClusterIP
     externalPort: 80
     internalPort: 8090
     annotations: {}
+
   resources:
+    # dashboard.resources.limits -- Pods resource limits
     limits:
       cpu: 100m
       memory: 256Mi
+
+    # dashboard.resources.limits -- Pods resource requests
     requests:
       cpu: 80m
       memory: 128Mi
+
   ingress:
+    # dashboard.ingress.enabled -- Enable ingress
     enabled: false
+
+    # dashboard.ingress.annotations -- Ingress annotations
     annotations: {}
+
+    # dashboard.ingress.hosts -- Ingress host names
     hosts: []
