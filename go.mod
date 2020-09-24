@@ -6,7 +6,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-logr/logr v0.1.0
 	github.com/gorilla/mux v1.8.0
-	github.com/jenkins-x/go-scm v1.5.166
+	github.com/jenkins-x/go-scm v1.5.175
 	github.com/onsi/ginkgo v1.12.1
 	github.com/onsi/gomega v1.10.1
 	github.com/pkg/errors v0.9.1
@@ -17,5 +17,3 @@ require (
 	sigs.k8s.io/controller-runtime v0.5.0
 	sigs.k8s.io/yaml v1.1.0
 )
-
-replace github.com/jenkins-x/go-scm => /Users/charlesbreteche/Documents/dev/eddycharly/go-scm

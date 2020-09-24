@@ -8,8 +8,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
   Typography, Toolbar
 } from '@material-ui/core';
@@ -39,7 +37,7 @@ function RepoConfig(props: any) {
 
   React.useEffect(() => {
     getRepoConfig(props.match.params.name).then(result => setItem(result));
-  }, []);
+  }, [props.match.params.name]);
 
   if (item == null) {
     return null;

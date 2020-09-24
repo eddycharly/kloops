@@ -163,7 +163,7 @@ export function PluginConfig({ match }: props) {
 
     React.useEffect(() => {
         getPluginConfig(match.params.name).then(result => setSubject(result));
-    }, []);
+    }, [match.params.name]);
 
     if (subject == null) {
         return null;

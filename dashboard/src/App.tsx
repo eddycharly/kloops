@@ -39,7 +39,7 @@ export function App(props: any) {
     if (props.onUnload) {
       props.onUnload();
     }
-  }, []);
+  }, [props]);
 
   // React.useEffect(() => {
   //   if (props.webSocketConnected) {
