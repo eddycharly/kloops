@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
-	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/logr v0.2.1
 	github.com/gorilla/mux v1.8.0
 	github.com/jenkins-x/go-scm v1.5.175
 	github.com/onsi/ginkgo v1.12.1
