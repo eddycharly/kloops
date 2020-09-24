@@ -9,7 +9,7 @@ This chart bootstraps installation of [KLoops](https://github.com/eddycharly/klo
 - Add kloops helm charts repo
 
 ```bash
-helm repo add kloops TODO
+helm repo add kloops https://eddycharly.github.io/kloops
 
 helm repo update
 ```
