@@ -1,23 +1,21 @@
 import React from 'react';
 import './App.css';
 import { HashRouter as Router } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { CssBaseline } from '@material-ui/core';
 import {
   Content,
   SideNav,
-  TopBar
+  ThemeDark,
+  ThemeLight,
+  TopBar,
+  UseStyles
 } from './containers';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-  }
-}));
-
-function App(props: any) {
-  const classes = useStyles();
+export function App(props: any) {
+  const classes = UseStyles();
   const [open, setOpen] = React.useState(false);
+  const [light, setLight] = React.useState(true);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -25,6 +23,16 @@ function App(props: any) {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+
+  const handleToggleTheme = () => {
+    if (light) {
+      console.log("set theme 2");
+      setLight(!light);
+    } else {
+      console.log("set theme 1");
+      setLight(!light);
+    }
   };
 
   React.useEffect(() => function () {
@@ -41,15 +49,15 @@ function App(props: any) {
   // }, [props.webSocketConnected]);
 
   return (
-    <div className={classes.root}>
+    <ThemeProvider theme={light ? createMuiTheme(ThemeLight) : createMuiTheme(ThemeDark)}>
       <CssBaseline />
-      <Router>
-        <TopBar open={open} handleDrawerOpen={handleDrawerOpen} />
-        <SideNav open={open} handleDrawerClose={handleDrawerClose} />
-        <Content />
-      </Router>
-    </div>
+      <div className={classes.root}>
+        <Router>
+          <TopBar open={open} handleDrawerOpen={handleDrawerOpen} handleToggleTheme={handleToggleTheme} />
+          <SideNav open={open} handleDrawerClose={handleDrawerClose} />
+          <Content />
+        </Router>
+      </div>
+    </ThemeProvider>
   );
 }
-
-export default App;

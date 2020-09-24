@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
+import { UseStyles } from '..';
 import {
   AppBar,
   IconButton,
@@ -10,41 +10,13 @@ import {
   Typography
 } from '@material-ui/core';
 import {
-  Menu as MenuIcon
+  Brightness4 as ThemeIcon,
+  GitHub as GitHubIcon,
+  Menu as MenuIcon,
 } from '@material-ui/icons';
 
-const drawerWidth = 240;
-
-const useStyles = makeStyles((theme) => ({
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  menuButton: {
-    marginRight: 30,
-  },
-  menuButtonHidden: {
-    display: 'none',
-  },
-  logo: {
-    maxHeight: 48,
-    marginRight: 30,
-  },
-}));
-
 export function TopBar(props: any) {
-  const classes = useStyles();
+  const classes = UseStyles();
 
   return (
     <AppBar position="fixed" className={clsx(classes.appBar, props.open && classes.appBarShift)}>
@@ -62,6 +34,13 @@ export function TopBar(props: any) {
           <img src="logo.png" alt="logo" className={classes.logo} />
         </Link>
         <Typography variant="h6" noWrap><Link href="#/" color="inherit" underline="none">KLOOPS</Link></Typography>
+        <div className={classes.grow} />
+        <IconButton color="inherit" target="_blank" href="https://github.com/eddycharly/kloops/">
+          <GitHubIcon />
+        </IconButton>
+        <IconButton color="inherit" onClick={props.handleToggleTheme}>
+          <ThemeIcon />
+        </IconButton>
       </Toolbar>
       {props.isFetching && (
         <LinearProgress />

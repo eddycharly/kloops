@@ -2,7 +2,6 @@ import React from 'react';
 import clsx from 'clsx';
 import { UseStyles } from '..';
 import {
-  Box,
   List,
   ListItem,
   ListItemText,
