@@ -63,3 +63,7 @@ You will find the following components images:
 KLoops helm charts are available at https://eddycharly.github.io/kloops.
 
 You can browse the chart [docs](./charts/kloops/README.md) to find install instructions and supported configuration.
+
+## Docs
+
+Docs are located in the [docs](./docs/README.md) folder, you will find user docs, install docs, dev docs and more.

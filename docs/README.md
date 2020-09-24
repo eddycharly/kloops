@@ -1,14 +1,10 @@
-# kloops
+# KLoops docs
 
-## Creating the project from scratch
+The docs are work in progress and are being improved constantly. Please create an issue if you would like to see something specific added.
 
-1. Run `./install-kubebuilder.sh` to install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder)
-1. Run `go mod init github.com/eddycharly/kloops`
-1. Run `kubebuilder init --domain kloops.io` to create the project
+For now, you can read about:
 
-## Creating the apis
+- [KLoops components](./components/README.md)
+- [KLoops develoment](./dev/README.md)
 
-### RepoConfig
-
-`kubebuilder create api --group config --version v1alpha1 --kind PluginConfig`
-`kubebuilder create api --group config --version v1alpha1 --kind RepoConfig`
+If you want to know more about the KLoops project you can also look at our [roadmap](../ROADMAP.md).
