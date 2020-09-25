@@ -22,7 +22,6 @@ var (
 				Optional: true,
 			},
 			Description: "Assigns an assignee to the PR or issue or requests a review from the user(s)",
-			Featured:    true,
 			WhoCanUse:   "Anyone can use the command, but the target user must be an org member, a repo collaborator, or should have previously commented on the issue or PR.",
 			Action: plugins.
 				Invoke(handleGenericComment).

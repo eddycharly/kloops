@@ -445,7 +445,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-]test",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -463,7 +462,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -487,7 +485,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test [foo|bar]",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -510,7 +507,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test [anything]",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -534,7 +530,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test [arg description]",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -557,7 +552,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test <foo|bar>",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -578,7 +572,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test <anything>",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -601,7 +594,6 @@ func TestCommandGetHelp(t *testing.T) {
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test <arg description>",
-				Featured:    false,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{
@@ -621,11 +613,9 @@ func TestCommandGetHelp(t *testing.T) {
 					Pattern: "foo|bar",
 				},
 				Description: "Some command description",
-				Featured:    true,
 			},
 			expected: pluginhelp.Command{
 				Usage:       "/[lh-][prefix-]test <foo|bar>",
-				Featured:    true,
 				Description: "Some command description",
 				WhoCanUse:   "Anyone",
 				Examples: []string{

@@ -22,8 +22,6 @@ package pluginhelp
 type Command struct {
 	// Usage is a usage string for the command.
 	Usage string `json:"usage"`
-	// Featured is a flag for featured/highlight plugins.
-	Featured bool `json:"featured"`
 	// Description is a short description about what does the command do.
 	Description string `json:"description"`
 	// Examples is a list of usage example for the command.

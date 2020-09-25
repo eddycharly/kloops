@@ -1,6 +1,5 @@
 export interface Command {
     usage: string;
-    featured: boolean;
     description: string;
     examples: Array<string>;
     whoCanUse: string;

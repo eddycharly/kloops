@@ -150,7 +150,6 @@ type Command struct {
 	Name        string
 	Arg         *CommandArg
 	Description string
-	Featured    bool
 	WhoCanUse   string
 	MaxMatches  int
 	Action      CommandInvoker
@@ -245,7 +244,6 @@ func (cmd Command) GetHelp() pluginhelp.Command {
 	}
 	return pluginhelp.Command{
 		Usage:       usage,
-		Featured:    cmd.Featured,
 		Description: cmd.Description,
 		Examples:    examples,
 		WhoCanUse:   who,
