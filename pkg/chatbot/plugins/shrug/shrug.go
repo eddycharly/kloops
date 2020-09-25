@@ -15,7 +15,7 @@ const (
 
 var (
 	plugin = plugins.Plugin{
-		Description: label,
+		Description: "`¯\\_(ツ)_/¯`",
 		Commands: []plugins.Command{{
 			Prefix:      "un",
 			Name:        "shrug",

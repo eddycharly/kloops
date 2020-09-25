@@ -18,7 +18,7 @@ The table below lists the commands KLoops understands.
 
 In addition, you can prefix commands with {{ code "kl-" }}. For example, {{ code "/meow" }} and {{ code "/kl-meow" }} are equivalent.
 
-This is because Gitlab hijacks some slash commands for its own quick actions, and we never get notified.
+This is because Gitlab hijacks some slash commands for its own [quick actions](https://docs.gitlab.com/ee/user/project/quick_actions.html), and we never get notified.
 In practice, we don’t need the {{ code "kl-" }} prefix for everything, just commands that also are quick actions,
 but we opted to play it safe and add {{ code "kl-" }} prefixes for every command just in case Gitlab eventually adds conflicting quick actions.
 
@@ -33,7 +33,7 @@ at which point we wouldn't need to worry about it any more, but for now, we do n
 {{- $command := . }}
 {{- range (entries .Name) }}
 {{- $examples := examples $command.Prefix . }}
-| {{ cmd $command.Prefix . | code }} | {{ arg $command.Arg }} | {{ $command.Description }} | <ul>{{- range $examples }}<li>{{ code . }}</li>{{ end }}</ul> | {{ $name }} |
+| {{ cmd $command.Prefix . | code }} | {{ arg $command.Arg }} | {{ $command.Description }} | <ul>{{- range $examples }}<li>{{ code . }}</li>{{ end }}</ul> | [{{ $name }}](./PLUGINS.md#{{ $name }}) |
 {{- end }}
 {{- end }}
 {{- end }}`
@@ -78,7 +78,6 @@ at which point we wouldn't need to worry about it any more, but for now, we do n
 		panic(err)
 	}
 
-	// f, err := os.Create(path.Join(output, packageToFile(k)))
 	if err := t.Execute(os.Stdout, plugins.GetPlugins()); err != nil {
 		panic(err)
 	}

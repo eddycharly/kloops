@@ -100,7 +100,7 @@ func (plugin Plugin) GetHelp(config *v1alpha1.PluginConfigSpec) (*pluginhelp.Plu
 	var err error
 	h := &pluginhelp.PluginHelp{
 		Description:       plugin.Description,
-		Events:            plugin.getEvents(),
+		Events:            plugin.GetEvents(),
 		ExcludedProviders: plugin.ExcludedProviders.List(),
 	}
 	if plugin.ConfigHelpProvider != nil {
@@ -117,7 +117,7 @@ func (plugin Plugin) IsProviderExcluded(provider string) bool {
 	return plugin.ExcludedProviders.Has(provider)
 }
 
-func (plugin Plugin) getEvents() []string {
+func (plugin Plugin) GetEvents() []string {
 	var events []string
 	if plugin.IssueHandler != nil {
 		events = append(events, "issue")

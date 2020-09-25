@@ -44,7 +44,7 @@ function verify_supported() {
 
 function create_kind_cluster() {
     message "Starting kind cluster $CLUSTER_NAME ..."
-    kind create cluster --name $CLUSTER_NAME --config ./scripts/kind-config.yaml
+    kind create cluster --name $CLUSTER_NAME --config ./scripts/cluster/kind-config.yaml
 }
 
 function add_helm_repos() {
@@ -70,17 +70,17 @@ function deploy_nginx_ingress() {
 
 function deploy_metrics_server() {
     message "Deploying metrics server ..."
-    $HELM_BINARY upgrade --install --wait --create-namespace --namespace tools metrics-server stable/metrics-server --values ./scripts/metrics-server-config.yaml
+    $HELM_BINARY upgrade --install --wait --create-namespace --namespace tools metrics-server stable/metrics-server --values ./scripts/cluster/metrics-server-config.yaml
 }
 
 function deploy_kubernetes_dashboard() {
     message "Deploying Kubernetes dashboard ..."
-    $HELM_BINARY upgrade --install --wait --create-namespace --namespace tools dashboard kubernetes-dashboard/kubernetes-dashboard --values ./scripts/kubernetes-dashboard-config.yaml
+    $HELM_BINARY upgrade --install --wait --create-namespace --namespace tools dashboard kubernetes-dashboard/kubernetes-dashboard --values ./scripts/cluster/kubernetes-dashboard-config.yaml
 }
 
 function deploy_minio() {
     message "Deploying minio storage ..."
-    $HELM_BINARY upgrade --install --version 6.3.1 --wait --create-namespace --namespace tools minio minio/minio --values ./scripts/minio-config.yaml
+    $HELM_BINARY upgrade --install --version 6.3.1 --wait --create-namespace --namespace tools minio minio/minio --values ./scripts/cluster/minio-config.yaml
 }
 
 function deploy_logging_operator() {
@@ -90,12 +90,12 @@ function deploy_logging_operator() {
 
 function deploy_logging_pipeline() {
     message "Deploying logging pipeline ..."
-    kubectl apply -n tools -f ./scripts/logging-pipeline.yaml
+    kubectl apply -n tools -f ./scripts/cluster/logging-pipeline.yaml
 }
 
 function deploy_logs_server() {
     message "Deploying logs server ..."
-    kubectl apply -n tools -f ./scripts/logs-server.yaml
+    kubectl apply -n tools -f ./scripts/cluster/logs-server.yaml
 }
 
 function deploy_tekton_pipelines() {
@@ -113,7 +113,7 @@ function deploy_tekton_dashboard() {
 
 function deploy_gitea() {
     message "Deploying Gitea ..."
-    $HELM_BINARY upgrade --install --namespace tools --create-namespace --wait gitea gitea-charts/gitea --values ./scripts/gitea-config.yaml \
+    $HELM_BINARY upgrade --install --namespace tools --create-namespace --wait gitea gitea-charts/gitea --values ./scripts/cluster/gitea-config.yaml \
         --set gitea.admin.username=$GITEA_ADMIN_USER --set gitea.admin.password=$GITEA_ADMIN_PASSWORD
 }
 
@@ -141,7 +141,7 @@ function init_gitea() {
 
 function deploy_kloops() {
     message "Deploying KLoops ..."
-    $HELM_BINARY upgrade --install --namespace tools --create-namespace --wait kloops ./charts/kloops --values ./scripts/kloops-config.yaml
+    $HELM_BINARY upgrade --install --namespace tools --create-namespace --wait kloops ./charts/kloops --values ./scripts/cluster/kloops-config.yaml
 }
 
 function init_kloops() {
@@ -156,7 +156,7 @@ stringData:
   hmac: $KLOOPS_HMAC
   token: $KLOOPS_TOKEN
 EOF
-    kubectl apply -n tools -f ./scripts/kloops-default-pluginconfig.yaml
+    kubectl apply -n tools -f ./scripts/cluster/kloops-default-pluginconfig.yaml
     kubectl apply -n tools -f - <<EOF
 apiVersion: config.kloops.io/v1alpha1
 kind: RepoConfig

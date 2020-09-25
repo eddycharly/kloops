@@ -107,4 +107,9 @@ CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
 gen-docs-commands:
-	go run ./scripts/gen-docs/commands.go > ./docs/plugins/COMMANDS.md
+	go run ./scripts/gen-docs/commands/main.go > ./docs/plugins/COMMANDS.md
+
+gen-docs-plugins:
+	go run ./scripts/gen-docs/plugins/main.go > ./docs/plugins/PLUGINS.md
+
+gen-docs: gen-docs-commands gen-docs-plugins
