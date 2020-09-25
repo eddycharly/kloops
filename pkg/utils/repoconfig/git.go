@@ -3,7 +3,7 @@ package utils
 import (
 	"errors"
 
-	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/git"
 	"github.com/eddycharly/kloops/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/client"

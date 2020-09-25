@@ -3,7 +3,7 @@ package utils
 import (
 	"errors"
 
-	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/jenkins-x/go-scm/scm"
 	"github.com/jenkins-x/go-scm/scm/factory"

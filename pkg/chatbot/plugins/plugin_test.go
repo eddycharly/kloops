@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 	"k8s.io/apimachinery/pkg/util/sets"

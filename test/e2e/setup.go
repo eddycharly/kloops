@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/git"
 	"github.com/eddycharly/kloops/pkg/repoowners"
 	"github.com/eddycharly/kloops/pkg/scmprovider"

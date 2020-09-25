@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 	"github.com/eddycharly/kloops/pkg/git"
 	"github.com/eddycharly/kloops/pkg/scmprovider"

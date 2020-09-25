@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/chatbot/events"
 	"github.com/eddycharly/kloops/pkg/git"
 	"github.com/eddycharly/kloops/pkg/utils"

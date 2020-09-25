@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	"github.com/eddycharly/kloops/pkg/dashboard/server/models"
 	"github.com/eddycharly/kloops/pkg/utils"
 	utilsrepoconfig "github.com/eddycharly/kloops/pkg/utils/repoconfig"

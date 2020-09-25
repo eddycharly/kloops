@@ -6,5 +6,7 @@ For now, you can read about:
 
 - [KLoops components](./components/README.md)
 - [KLoops develoment](./dev/README.md)
+- [KLoops plugins](./plugins/PLUGINS.md)
+- [KLoops commands](./plugins/COMMANDS.md)
 
 If you want to know more about the KLoops project you can also look at our [roadmap](../ROADMAP.md).

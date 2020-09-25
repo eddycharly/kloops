@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	configv1alpha1 "github.com/eddycharly/kloops/api/v1alpha1"
+	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/pluginimports"
 	"github.com/eddycharly/kloops/pkg/chatbot/server"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -22,7 +22,7 @@ var (
 
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
-	_ = configv1alpha1.AddToScheme(scheme)
+	_ = v1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
