@@ -17,12 +17,14 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
 	"github.com/eddycharly/kloops/apis/config/v1alpha1"
 	_ "github.com/eddycharly/kloops/pkg/chatbot/pluginimports"
 	"github.com/eddycharly/kloops/pkg/dashboard/server"
+	"github.com/eddycharly/kloops/pkg/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -64,9 +66,30 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Define all broadcasters/channels
+	// Keep broadcaster channels open indefinitely
+	var resourcesChannel = make(chan utils.SocketData)
+
+	var resourcesBroadcaster = utils.NewBroadcaster(resourcesChannel)
+
+	cache := mgr.GetCache()
+	informer, err := cache.GetInformer(context.TODO(), &v1alpha1.RepoConfig{})
+	if err != nil {
+		setupLog.Error(err, "unable to start controller")
+		os.Exit(1)
+	}
+
+	utils.NewController(
+		resourcesChannel,
+		informer,
+		"created",
+		"updated",
+		"deleted",
+	)
+
 	stopCh := ctrl.SetupSignalHandler()
 
-	server := server.NewServer(namespace, mgr.GetConfig(), mgr.GetClient(), ctrl.Log)
+	server := server.NewServer(namespace, mgr.GetConfig(), mgr.GetClient(), resourcesBroadcaster, ctrl.Log)
 
 	go func() {
 		if err := server.Start("", 8090); err != nil {

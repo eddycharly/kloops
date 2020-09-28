@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/eddycharly/kloops/pkg/dashboard/server/handlers"
+	"github.com/eddycharly/kloops/pkg/utils"
 	"github.com/go-logr/logr"
 	"github.com/gorilla/mux"
 	"k8s.io/client-go/rest"
@@ -18,18 +19,20 @@ type Server interface {
 }
 
 type server struct {
-	namespace string
-	config    *rest.Config
-	client    client.Client
-	logger    logr.Logger
+	namespace   string
+	config      *rest.Config
+	client      client.Client
+	broadcaster *utils.Broadcaster
+	logger      logr.Logger
 }
 
-func NewServer(namespace string, config *rest.Config, client client.Client, logger logr.Logger) Server {
+func NewServer(namespace string, config *rest.Config, client client.Client, broadcaster *utils.Broadcaster, logger logr.Logger) Server {
 	return &server{
-		namespace: namespace,
-		config:    config,
-		client:    client,
-		logger:    logger.WithName("Server"),
+		namespace:   namespace,
+		config:      config,
+		client:      client,
+		broadcaster: broadcaster,
+		logger:      logger.WithName("Server"),
 	}
 }
 
@@ -51,6 +54,16 @@ func (s *server) Start(addr string, port int) error {
 	r.HandleFunc("/api/repos/{name}", repoConfig.Get).Methods("GET")
 	r.HandleFunc("/api/repos", repoConfig.Create).Methods("POST")
 	r.HandleFunc("/api/hooks/{name}", repoConfig.Hook).Methods("POST")
+	// Websocket
+	r.HandleFunc("/resources", func(w http.ResponseWriter, r *http.Request) {
+		connection, err := utils.UpgradeToWebsocket(w, r)
+		if err != nil {
+			fmt.Println(err)
+			// log.Error().Err(err).Msg("Could not upgrade to websocket connection")
+			return
+		}
+		utils.WriteOnlyWebsocket(connection, s.broadcaster)
+	})
 	// Static content
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./dashboard/build"))))
 	return http.ListenAndServe(fmt.Sprintf("%s:%d", addr, port), r)
