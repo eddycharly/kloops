@@ -14,7 +14,7 @@ import {
 
 export function CommandHelp() {
   const classes = UseStyles();
-  const models = useSelector((state: RootState) => state.commandHelp.state === 'finished' ? state.commandHelp.data : {});
+  const models = useSelector((state: RootState) => (state.commandHelp && state.commandHelp.state === 'finished') ? state.commandHelp.data : {});
   const dispatch = useDispatch();
 
   React.useEffect(() => {
