@@ -2,6 +2,8 @@ import React from 'react';
 import clsx from 'clsx';
 import { UseStyles } from '..';
 import { Brightness4, GitHub, Menu } from '@material-ui/icons';
+import { useSelector } from 'react-redux'
+import { RootState } from 'reducers'
 import {
   AppBar,
   IconButton,
@@ -19,7 +21,7 @@ interface props {
 
 export function TopBar({ handleDrawerOpen, handleToggleTheme, open }: props) {
   const classes = UseStyles();
-  const isFetching = false;
+  const isFetching = useSelector((state: RootState) => (state.pluginHelp && state.pluginHelp.state === 'loading'));
   return (
     <AppBar position="fixed" className={clsx(classes.appBar, open && classes.appBarShift)}>
       <Toolbar>

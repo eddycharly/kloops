@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
 
 export function PluginHelpList() {
   const classes = useStyles();
-  const models = useSelector((state: RootState) => state.pluginHelp.state === 'finished' ? state.pluginHelp.data : {});
+  const models = useSelector((state: RootState) => (state.pluginHelp && state.pluginHelp.state === 'finished') ? state.pluginHelp.data : {});
   const dispatch = useDispatch();
 
   React.useEffect(() => {
