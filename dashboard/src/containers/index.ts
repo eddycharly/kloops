@@ -2,7 +2,6 @@ export * from './CommandHelp';
 export * from './Content';
 export * from './Home';
 export * from './PluginConfig';
-export * from './PluginHelp';
 export { default as RepoConfig } from './RepoConfig';
 export { default as RepoConfigForm } from './RepoConfigForm';
 export { default as RepoConfigs } from './RepoConfigs';
