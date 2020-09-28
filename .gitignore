@@ -23,8 +23,8 @@ bin
 *.swo
 *~
 
-config
-tempo
+/config
+/tempo
 
 
 .DS_Store

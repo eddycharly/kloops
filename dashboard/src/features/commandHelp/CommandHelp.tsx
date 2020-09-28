@@ -19,7 +19,7 @@ export function CommandHelp() {
 
   React.useEffect(() => {
     dispatch(FetchAll())
-  }, []);
+  }, [dispatch]);
 
   return (
     <Paper className={classes.paper}>

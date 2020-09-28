@@ -1,4 +1,3 @@
-export * from './CommandHelp';
 export * from './Content';
 export * from './Home';
 export * from './PluginConfig';
