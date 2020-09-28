@@ -1,5 +1,8 @@
 import React from 'react';
-import { UseStyles } from '..';
+import { useDispatch, useSelector } from 'react-redux'
+import { UseStyles } from 'containers/Utils';
+import { FetchAll } from './Slice';
+import { RootState } from 'reducers'
 import {
   Paper,
   Table,
@@ -8,24 +11,15 @@ import {
   TableHead,
   TableRow
 } from '@material-ui/core';
-import {
-  getPluginHelp
-} from '../../api/PluginHelp';
-import {
-  PluginHelp
-} from '../../models';
 
 export function CommandHelp() {
   const classes = UseStyles();
-  const [items, setItems] = React.useState<{ [name: string]: PluginHelp } | null>(null);
+  const models = useSelector((state: RootState) => state.commandHelp.state === 'finished' ? state.commandHelp.data : {});
+  const dispatch = useDispatch();
 
   React.useEffect(() => {
-    getPluginHelp().then(result => setItems(result));
+    dispatch(FetchAll())
   }, []);
-
-  if (!items) {
-    return null;
-  }
 
   return (
     <Paper className={classes.paper}>
@@ -40,7 +34,7 @@ export function CommandHelp() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.entries(items).map(([key, value]) => (
+          {Object.entries(models).map(([key, value]) => (
             <>
               {value.commands && value.commands.map(cmd => (
                 <TableRow>
