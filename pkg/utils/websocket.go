@@ -2,27 +2,29 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-// // UpgradeToWebsocket attempts to upgrade connection from HTTP(S) to WS(S)
-// func UpgradeToWebsocket(request *restful.Request, response *restful.Response) (*websocket.Conn, error) {
-// 	var writer http.ResponseWriter = response
-// 	log.Debug().Msg("Upgrading connection to websocket...")
-// 	// Handles writing error to response
-// 	upgrader := websocket.Upgrader{
-// 		ReadBufferSize:  1024,
-// 		WriteBufferSize: 4096,
-// 		CheckOrigin: func(r *http.Request) bool {
-// 			return true
-// 		},
-// 	}
-// 	connection, err := upgrader.Upgrade(writer, request.Request, nil)
-// 	return connection, err
-// }
+// UpgradeToWebsocket attempts to upgrade connection from HTTP(S) to WS(S)
+func UpgradeToWebsocket(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+	// log.Debug().Msg("Upgrading connection to websocket...")
+	fmt.Println("Upgrading connection to websocket...")
+	// Handles writing error to response
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 4096,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+	connection, err := upgrader.Upgrade(w, r, nil)
+	return connection, err
+}
 
 // WriteOnlyWebsocket discards text messages from the peer connection
 func WriteOnlyWebsocket(connection *websocket.Conn, b *Broadcaster) {
