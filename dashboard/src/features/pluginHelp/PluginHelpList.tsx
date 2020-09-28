@@ -18,7 +18,7 @@ export function PluginHelpList() {
 
   React.useEffect(() => {
     dispatch(FetchAll())
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className={classes.root}>

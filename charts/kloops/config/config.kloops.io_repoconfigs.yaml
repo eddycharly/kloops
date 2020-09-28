@@ -1,0 +1,374 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.0
+  creationTimestamp: null
+  name: repoconfigs.config.kloops.io
+spec:
+  group: config.kloops.io
+  names:
+    kind: RepoConfig
+    listKind: RepoConfigList
+    plural: repoconfigs
+    singular: repoconfig
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .metadata.creationTimestamp
+      name: age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: RepoConfig is the Schema for the repoconfigs API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RepoConfigSpec defines the desired state of RepoConfig
+            properties:
+              autoMerge:
+                description: AutoMerge configuration for the repository
+                properties:
+                  batchSizeLimit:
+                    description: 'BatchSizeLimitMap is the batch size limit as the value. Special values:  0 => unlimited batch size -1 => batch merging disabled :('
+                    type: integer
+                  labels:
+                    description: Labels are the labels required on pull requests for merging
+                    items:
+                      type: string
+                    type: array
+                  mergeType:
+                    description: MergeType is the merge method to use when merging pull requests. Valid options are squash, rebase, and merge.
+                    type: string
+                  missingLabels:
+                    description: MissingLabels are the labels that must not be present on pull requests for merging
+                    items:
+                      type: string
+                    type: array
+                  reviewApprovedRequired:
+                    description: ReviewApprovedRequired tells that review must be approved on pull requests for merging
+                    type: boolean
+                required:
+                - batchSizeLimit
+                - labels
+                - mergeType
+                - missingLabels
+                - reviewApprovedRequired
+                type: object
+              botName:
+                description: BotName is the bot name used by plugins
+                type: string
+              gitHub:
+                description: GitHub defines the GitHub repository details
+                properties:
+                  hmacToken:
+                    description: HmacToken is the secret used to validate webhooks
+                    properties:
+                      value:
+                        description: Refers to a non-secret value
+                        type: string
+                      valueFrom:
+                        description: Refers to a secret value to be used directly
+                        properties:
+                          secretKeyRef:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                        required:
+                        - secretKeyRef
+                        type: object
+                    type: object
+                  owner:
+                    description: Owner is the repository owner name
+                    type: string
+                  repo:
+                    description: Repo is the repository owner name
+                    type: string
+                  server:
+                    description: ServerURL is the GitHub server url
+                    type: string
+                  token:
+                    description: Token is the token used to interact with the git repository
+                    properties:
+                      value:
+                        description: Refers to a non-secret value
+                        type: string
+                      valueFrom:
+                        description: Refers to a secret value to be used directly
+                        properties:
+                          secretKeyRef:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                        required:
+                        - secretKeyRef
+                        type: object
+                    type: object
+                required:
+                - hmacToken
+                - owner
+                - repo
+                - token
+                type: object
+              gitea:
+                description: Gitea defines the Gitea repository details
+                properties:
+                  hmacToken:
+                    description: HmacToken is the secret used to validate webhooks
+                    properties:
+                      value:
+                        description: Refers to a non-secret value
+                        type: string
+                      valueFrom:
+                        description: Refers to a secret value to be used directly
+                        properties:
+                          secretKeyRef:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                        required:
+                        - secretKeyRef
+                        type: object
+                    type: object
+                  owner:
+                    description: Owner is the repository owner name
+                    type: string
+                  repo:
+                    description: Repo is the repository owner name
+                    type: string
+                  server:
+                    description: ServerURL is the GitHub server url
+                    type: string
+                  token:
+                    description: Token is the token used to interact with the git repository
+                    properties:
+                      value:
+                        description: Refers to a non-secret value
+                        type: string
+                      valueFrom:
+                        description: Refers to a secret value to be used directly
+                        properties:
+                          secretKeyRef:
+                            description: SecretKeySelector selects a key of a Secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                        required:
+                        - secretKeyRef
+                        type: object
+                    type: object
+                required:
+                - hmacToken
+                - owner
+                - repo
+                - token
+                type: object
+              pluginConfig:
+                description: PluginConfig defines the plugin configuration for the repository
+                properties:
+                  plugins:
+                    items:
+                      type: string
+                    type: array
+                  ref:
+                    type: string
+                  spec:
+                    description: PluginConfigSpec defines the desired state of PluginConfig
+                    properties:
+                      cat:
+                        description: Built-in plugins specific configuration.
+                        properties:
+                          key:
+                            description: Key is the api key for thecatapi.com
+                            properties:
+                              value:
+                                description: Refers to a non-secret value
+                                type: string
+                              valueFrom:
+                                description: Refers to a secret value to be used directly
+                                properties:
+                                  secretKeyRef:
+                                    description: SecretKeySelector selects a key of a Secret.
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the Secret or its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                required:
+                                - secretKeyRef
+                                type: object
+                            type: object
+                        required:
+                        - key
+                        type: object
+                      goose:
+                        description: Goose contains the configuration for the goose plugin.
+                        properties:
+                          key:
+                            description: Key is the api key for unsplash.com
+                            properties:
+                              value:
+                                description: Refers to a non-secret value
+                                type: string
+                              valueFrom:
+                                description: Refers to a secret value to be used directly
+                                properties:
+                                  secretKeyRef:
+                                    description: SecretKeySelector selects a key of a Secret.
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the Secret or its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                required:
+                                - secretKeyRef
+                                type: object
+                            type: object
+                        required:
+                        - key
+                        type: object
+                      label:
+                        description: Label contains the configuration for the label plugin.
+                        properties:
+                          additionalLabels:
+                            description: AdditionalLabels is a set of additional labels enabled for use on top of the existing "kind/*", "priority/*", and "area/*" labels.
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - additionalLabels
+                        type: object
+                      owners:
+                        description: Owners contains configuration related to handling OWNERS files.
+                        properties:
+                          labelsExcludes:
+                            description: LabelsExcludeList holds a list of labels that should not be present in any OWNERS file, preventing their automatic addition by the owners-label plugin. This check is performed by the verify-owners plugin.
+                            items:
+                              type: string
+                            type: array
+                          mdyamlrepos:
+                            description: "MDYAMLRepos is a list of org and org/repo strings specifying the repos that support YAML OWNERS config headers at the top of markdown (*.md) files. These headers function just like the config in an OWNERS file, but only apply to the file itself instead of the entire directory and all sub-directories. The yaml header must be at the start of the file and be bracketed with \"---\" like so: \n \t\t--- \t\tapprovers: \t\t- mikedanese \t\t- thockin \t\t---"
+                            items:
+                              type: string
+                            type: array
+                          skipCollaborators:
+                            description: SkipCollaborators disables collaborator cross-checks and forces both the approve and lgtm plugins to use solely OWNERS files for access control in the provided repos.
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      size:
+                        description: 'Size specifies configuration for the size plugin, defining lower bounds (in # lines changed) for each size label. XS is assumed to be zero.'
+                        properties:
+                          l:
+                            type: integer
+                          m:
+                            type: integer
+                          s:
+                            type: integer
+                          xl:
+                            type: integer
+                          xxl:
+                            type: integer
+                        required:
+                        - l
+                        - m
+                        - s
+                        - xl
+                        - xxl
+                        type: object
+                      welcome:
+                        description: Welcome contains the configuration for the welcome plugin.
+                        properties:
+                          messageTemplate:
+                            description: MessageTemplate is the welcome message template to post on new-contributor PRs
+                            type: string
+                        type: object
+                    type: object
+                type: object
+            required:
+            - pluginConfig
+            type: object
+          status:
+            description: RepoConfigStatus defines the observed state of RepoConfig
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
