@@ -1,4 +1,3 @@
-import { Middleware } from 'redux';
 import { Provider } from 'react-redux';
 import { logger } from 'redux-logger';
 import { configureStore } from '@reduxjs/toolkit'
@@ -12,5 +11,3 @@ export {
   RootReducer,
   ReconnectingWebSocket
 };
-
-export type { Middleware };
