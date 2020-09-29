@@ -6,7 +6,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-logr/logr v0.1.0
 	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/websocket v1.4.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/jenkins-x/go-scm v1.5.176
 	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.2
