@@ -12,7 +12,11 @@ import {
   UseStyles
 } from './containers';
 
-export function App(props: any) {
+interface props {
+  onUnload: () => void;
+};
+
+export function App({ onUnload }: props) {
   const classes = UseStyles();
   const [open, setOpen] = React.useState(false);
   const [light, setLight] = React.useState(true);
@@ -36,10 +40,10 @@ export function App(props: any) {
   };
 
   React.useEffect(() => function () {
-    if (props.onUnload) {
-      props.onUnload();
+    if (onUnload) {
+      onUnload();
     }
-  }, [props]);
+  }, [onUnload]);
 
   // React.useEffect(() => {
   //   if (props.webSocketConnected) {

@@ -1,21 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import logger from 'redux-logger';
-import { configureStore } from '@reduxjs/toolkit'
-import './index.css';
+import { React, ReactDOM } from 'utils/imports/react';
+import { configureStore, logger, Provider, ReconnectingWebSocket, RootReducer } from 'utils/imports/redux';
+import { getWebSocketEndpoint } from 'api';
 import { App } from './App';
-import { RootReducer } from 'reducers'
+import { createWebSocketMiddleware } from 'store/middleware';
+import './index.css';
+
+const webSocket = new ReconnectingWebSocket(getWebSocketEndpoint());
+function closeSocket() {
+  webSocket.close();
+}
 
 const store = configureStore({
   reducer: RootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger, createWebSocketMiddleware(webSocket)),
 });
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <App onUnload={closeSocket} />
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
