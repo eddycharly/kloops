@@ -1,25 +1,22 @@
-import { React, ReactDOM } from 'utils/imports/react';
-import { configureStore, logger, Provider, ReconnectingWebSocket, RootReducer } from 'utils/imports/redux';
-import { getWebSocketEndpoint } from 'api';
-import { App } from './App';
-import { createWebSocketMiddleware } from 'store/middleware';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { App } from 'app/App';
+import { SnackbarProvider } from 'notistack';
+import { Store, WebSocket } from 'app/store';
 import './index.css';
 
-const webSocket = new ReconnectingWebSocket(getWebSocketEndpoint());
 function closeSocket() {
-  webSocket.close();
+  WebSocket.close();
 }
-
-const store = configureStore({
-  reducer: RootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger, createWebSocketMiddleware(webSocket)),
-});
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App onUnload={closeSocket} />
-    </Provider>
+    <SnackbarProvider maxSnack={3}>
+      <Provider store={Store}>
+        <App onUnload={closeSocket} />
+      </Provider>
+    </SnackbarProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

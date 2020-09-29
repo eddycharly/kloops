@@ -2,8 +2,9 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles } from '@material-ui/core/styles';
 import { PluginHelp } from './PluginHelp';
-import { FetchAll } from './Slice';
-import { RootState } from 'reducers'
+import { FetchAll } from 'app/reducers/pluginHelp';
+import { RootState } from 'app/reducers';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -15,10 +16,11 @@ export function PluginHelpList() {
   const classes = useStyles();
   const models = useSelector((state: RootState) => (state.pluginHelp && state.pluginHelp.state === 'finished') ? state.pluginHelp.data : {});
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    dispatch(FetchAll())
-  }, [dispatch]);
+    dispatch(FetchAll(enqueueSnackbar))
+  }, [dispatch, enqueueSnackbar]);
 
   return (
     <div className={classes.root}>

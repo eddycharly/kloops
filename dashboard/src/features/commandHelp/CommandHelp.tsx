@@ -1,8 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 import { UseStyles } from 'containers/Utils';
-import { FetchAll } from './Slice';
-import { RootState } from 'reducers'
+import { FetchAll } from 'app/reducers/pluginHelp';
+import { RootState } from 'app/reducers';
+import { useSnackbar } from 'notistack';
 import {
   Paper,
   Table,
@@ -14,12 +15,13 @@ import {
 
 export function CommandHelp() {
   const classes = UseStyles();
-  const models = useSelector((state: RootState) => (state.commandHelp && state.commandHelp.state === 'finished') ? state.commandHelp.data : {});
+  const models = useSelector((state: RootState) => (state.pluginHelp && state.pluginHelp.state === 'finished') ? state.pluginHelp.data : {});
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    dispatch(FetchAll())
-  }, [dispatch]);
+    dispatch(FetchAll(enqueueSnackbar))
+  }, [dispatch, enqueueSnackbar]);
 
   return (
     <Paper className={classes.paper}>

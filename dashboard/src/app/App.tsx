@@ -10,10 +10,10 @@ import {
   ThemeLight,
   TopBar,
   UseStyles
-} from './containers';
+} from 'containers';
 
 interface props {
-  onUnload: () => void;
+  onUnload?: () => void;
 };
 
 export function App({ onUnload }: props) {

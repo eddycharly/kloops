@@ -2,8 +2,8 @@ import React from 'react';
 import clsx from 'clsx';
 import { UseStyles } from '..';
 import { Brightness4, GitHub, Menu } from '@material-ui/icons';
-import { useSelector } from 'react-redux'
-import { RootState } from 'reducers'
+import { useSelector } from 'react-redux';
+import { RootState } from 'app/reducers';
 import {
   AppBar,
   IconButton,

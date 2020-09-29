@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, SerializedError } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, SerializedError } from '@reduxjs/toolkit';
 import { PluginHelp } from 'models';
 import { getPluginHelp } from 'api';
 
@@ -8,14 +8,17 @@ type FailedState = { state: 'failed'; data: SerializedError };
 
 type State = LoadingState | FinishedState | FailedState | null;
 
-const initialState: State = { state: 'loading' };
-
 export const FetchAll = createAsyncThunk(
   'PluginHelp/FetchAll',
-  async () => {
-    return await getPluginHelp();
+  async (enqueue: any) => {
+    return await getPluginHelp().then(x => {
+      enqueue('Fetched plugins help successfully', {
+        variant: 'success'
+      });
+      return x;
+    });
   }
-)
+);
 
 export const Slice = createSlice({
   name: 'PluginHelp',
