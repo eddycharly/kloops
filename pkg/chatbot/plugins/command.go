@@ -222,32 +222,23 @@ func (cmd Command) FilterAndGetMatches(event *GenericCommentEvent) ([]CommandMat
 
 // GetHelp returns command help
 func (cmd Command) GetHelp() pluginhelp.Command {
-	var examples []string
-	for _, name := range strings.Split(cmd.Name, "|") {
-		examples = append(examples, "/"+name, "/kl-"+name)
+	help := pluginhelp.Command{
+		Prefix:      cmd.Prefix,
+		MaxMatches:  cmd.MaxMatches,
+		Description: cmd.Description,
+		WhoCanUse:   cmd.WhoCanUse,
 	}
-	usage := "/[kl-]"
-	if cmd.Prefix != "" {
-		usage += "[" + cmd.Prefix + "]"
-		for _, name := range strings.Split(cmd.Name, "|") {
-			examples = append(examples, "/"+cmd.Prefix+name, "/kl-"+cmd.Prefix+name)
+	for _, name := range strings.Split(cmd.Name, "|") {
+		help.Names = append(help.Names, name)
+	}
+	if cmd.Arg != nil {
+		help.Arg = &pluginhelp.CommandArg{
+			Usage:    cmd.Arg.Usage,
+			Pattern:  cmd.Arg.Pattern,
+			Optional: cmd.Arg.Optional,
 		}
 	}
-	usage += cmd.Name
-	if cmd.Arg != nil {
-		usage += " " + cmd.Arg.GetUsage()
-		// TODO examples
-	}
-	who := "Anyone"
-	if cmd.WhoCanUse != "" {
-		who = cmd.WhoCanUse
-	}
-	return pluginhelp.Command{
-		Usage:       usage,
-		Description: cmd.Description,
-		Examples:    examples,
-		WhoCanUse:   who,
-	}
+	return help
 }
 
 // CreateMatch creates a match from an array of strings

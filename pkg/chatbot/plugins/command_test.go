@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/eddycharly/kloops/pkg/chatbot/pluginhelp"
 	"github.com/eddycharly/kloops/pkg/chatbot/plugins"
 )
 
@@ -431,231 +430,231 @@ func TestCommandGetMatches(t *testing.T) {
 	}
 }
 
-func TestCommandGetHelp(t *testing.T) {
-	cases := []struct {
-		name     string
-		command  plugins.Command
-		expected pluginhelp.Command
-	}{
-		{
-			name: "no prefix and no arg",
-			command: plugins.Command{
-				Name:        "test",
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-]test",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-				},
-			},
-		},
-		{
-			name: "prefix and no arg",
-			command: plugins.Command{
-				Prefix:      "prefix-",
-				Name:        "test",
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "prefix and optional arg",
-			command: plugins.Command{
-				Prefix: "prefix-",
-				Name:   "test",
-				Arg: &plugins.CommandArg{
-					Pattern:  "foo|bar",
-					Optional: true,
-				},
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test [foo|bar]",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "prefix and optional arg no pattern",
-			command: plugins.Command{
-				Prefix: "prefix-",
-				Name:   "test",
-				Arg: &plugins.CommandArg{
-					Optional: true,
-				},
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test [anything]",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "prefix and optional arg with usage",
-			command: plugins.Command{
-				Prefix: "prefix-",
-				Name:   "test",
-				Arg: &plugins.CommandArg{
-					Usage:    "arg description",
-					Optional: true,
-				},
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test [arg description]",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "prefix and arg",
-			command: plugins.Command{
-				Prefix: "prefix-",
-				Name:   "test",
-				Arg: &plugins.CommandArg{
-					Pattern: "foo|bar",
-				},
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test <foo|bar>",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "prefix and arg no pattern",
-			command: plugins.Command{
-				Prefix:      "prefix-",
-				Name:        "test",
-				Arg:         &plugins.CommandArg{},
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test <anything>",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "prefix and arg with usage",
-			command: plugins.Command{
-				Prefix: "prefix-",
-				Name:   "test",
-				Arg: &plugins.CommandArg{
-					Usage: "arg description",
-				},
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test <arg description>",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "featured",
-			command: plugins.Command{
-				Prefix: "prefix-",
-				Name:   "test",
-				Arg: &plugins.CommandArg{
-					Pattern: "foo|bar",
-				},
-				Description: "Some command description",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test <foo|bar>",
-				Description: "Some command description",
-				WhoCanUse:   "Anyone",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-		{
-			name: "who can use",
-			command: plugins.Command{
-				Prefix: "prefix-",
-				Name:   "test",
-				Arg: &plugins.CommandArg{
-					Pattern: "foo|bar",
-				},
-				Description: "Some command description",
-				WhoCanUse:   "only admins",
-			},
-			expected: pluginhelp.Command{
-				Usage:       "/[lh-][prefix-]test <foo|bar>",
-				Description: "Some command description",
-				WhoCanUse:   "only admins",
-				Examples: []string{
-					"/test",
-					"/lh-test",
-					"/prefix-test",
-					"/lh-prefix-test",
-				},
-			},
-		},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			help := tc.command.GetHelp()
-			if !reflect.DeepEqual(tc.expected, help) {
-				t.Errorf("expected help %v, but got %v", tc.expected, help)
-			}
-		})
-	}
-}
+// func TestCommandGetHelp(t *testing.T) {
+// 	cases := []struct {
+// 		name     string
+// 		command  plugins.Command
+// 		expected pluginhelp.Command
+// 	}{
+// 		{
+// 			name: "no prefix and no arg",
+// 			command: plugins.Command{
+// 				Name:        "test",
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-]test",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "prefix and no arg",
+// 			command: plugins.Command{
+// 				Prefix:      "prefix-",
+// 				Name:        "test",
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "prefix and optional arg",
+// 			command: plugins.Command{
+// 				Prefix: "prefix-",
+// 				Name:   "test",
+// 				Arg: &plugins.CommandArg{
+// 					Pattern:  "foo|bar",
+// 					Optional: true,
+// 				},
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test [foo|bar]",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "prefix and optional arg no pattern",
+// 			command: plugins.Command{
+// 				Prefix: "prefix-",
+// 				Name:   "test",
+// 				Arg: &plugins.CommandArg{
+// 					Optional: true,
+// 				},
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test [anything]",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "prefix and optional arg with usage",
+// 			command: plugins.Command{
+// 				Prefix: "prefix-",
+// 				Name:   "test",
+// 				Arg: &plugins.CommandArg{
+// 					Usage:    "arg description",
+// 					Optional: true,
+// 				},
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test [arg description]",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "prefix and arg",
+// 			command: plugins.Command{
+// 				Prefix: "prefix-",
+// 				Name:   "test",
+// 				Arg: &plugins.CommandArg{
+// 					Pattern: "foo|bar",
+// 				},
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test <foo|bar>",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "prefix and arg no pattern",
+// 			command: plugins.Command{
+// 				Prefix:      "prefix-",
+// 				Name:        "test",
+// 				Arg:         &plugins.CommandArg{},
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test <anything>",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "prefix and arg with usage",
+// 			command: plugins.Command{
+// 				Prefix: "prefix-",
+// 				Name:   "test",
+// 				Arg: &plugins.CommandArg{
+// 					Usage: "arg description",
+// 				},
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test <arg description>",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "featured",
+// 			command: plugins.Command{
+// 				Prefix: "prefix-",
+// 				Name:   "test",
+// 				Arg: &plugins.CommandArg{
+// 					Pattern: "foo|bar",
+// 				},
+// 				Description: "Some command description",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test <foo|bar>",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "Anyone",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			name: "who can use",
+// 			command: plugins.Command{
+// 				Prefix: "prefix-",
+// 				Name:   "test",
+// 				Arg: &plugins.CommandArg{
+// 					Pattern: "foo|bar",
+// 				},
+// 				Description: "Some command description",
+// 				WhoCanUse:   "only admins",
+// 			},
+// 			expected: pluginhelp.Command{
+// 				Usage:       "/[lh-][prefix-]test <foo|bar>",
+// 				Description: "Some command description",
+// 				WhoCanUse:   "only admins",
+// 				Examples: []string{
+// 					"/test",
+// 					"/lh-test",
+// 					"/prefix-test",
+// 					"/lh-prefix-test",
+// 				},
+// 			},
+// 		},
+// 	}
+// 	for _, tc := range cases {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			help := tc.command.GetHelp()
+// 			if !reflect.DeepEqual(tc.expected, help) {
+// 				t.Errorf("expected help %v, but got %v", tc.expected, help)
+// 			}
+// 		})
+// 	}
+// }

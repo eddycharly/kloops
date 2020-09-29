@@ -13,6 +13,13 @@ import {
   TableRow
 } from '@material-ui/core';
 
+function getName(prefix: string | undefined, name: string) {
+  if (prefix) {
+    return (<>{`/[${prefix}]${name}`}</>);
+  }
+  return (<>{`/${name}`}</>);
+}
+
 export function CommandHelp() {
   const classes = UseStyles();
   const models = useSelector((state: RootState) => (state.pluginHelp && state.pluginHelp.state === 'finished') ? state.pluginHelp.data : {});
@@ -39,23 +46,26 @@ export function CommandHelp() {
           {Object.entries(models).map(([key, value]) => (
             <>
               {value.commands && value.commands.map(cmd => (
-                <TableRow>
-                  <TableCell>{cmd.usage}</TableCell>
-                  <TableCell>
-                    <ul>
+                <>
+                  {cmd.names.map(name => (
+                    <TableRow>
+                      <TableCell>{getName(cmd.prefix, name)}</TableCell>
+                      <TableCell>
+                        {/* <ul>
                       {cmd.examples.map(y => (
                         <li>{y}</li>
                       ))}
-                    </ul>
-                  </TableCell>
-                  <TableCell>{cmd.description}</TableCell>
-                  <TableCell>{cmd.whoCanUse}</TableCell>
-                  <TableCell>{key}</TableCell>
-                </TableRow>
+                    </ul> */}
+                      </TableCell>
+                      <TableCell>{cmd.description}</TableCell>
+                      <TableCell>{cmd.whoCanUse || "Anyone"}</TableCell>
+                      <TableCell>{key}</TableCell>
+                    </TableRow>
+                  ))}
+                </>
               ))}
             </>
-          )
-          )}
+          ))}
         </TableBody>
       </Table>
     </Paper>

@@ -39,6 +39,13 @@ function getShortHelp(model: Model) {
   return "No description";
 }
 
+function getName(prefix: string | undefined, name: string) {
+  if (prefix) {
+    return `/[${prefix}]${name}`;
+  }
+  return `/${name}`;
+}
+
 interface props {
   model: Model,
   name: string,
@@ -74,17 +81,21 @@ export function PluginHelp({ model, name }: props) {
               </List>
             </Grid>
           )}
-          {model.commands && model.commands.map(x => (
+          {model.commands && model.commands.map(cmd => (
             <Grid item xs>
               <Typography variant="h6" color="primary">Command</Typography>
-              <Typography color="secondary">{x.usage}</Typography>
-              <Typography>{x.description}</Typography>
-              <Typography>Examples</Typography>
+              <Typography color="secondary">
+                <ul>
+                  {cmd.names.map(name => (<li>{getName(cmd.prefix, name)}</li>))}
+                </ul>
+              </Typography>
+              <Typography>{cmd.description}</Typography>
+              {/* <Typography>Examples</Typography>
               <ul>
                 {x.examples.map(y => (
                   <li>{y}</li>
                 ))}
-              </ul>
+              </ul> */}
             </Grid>
           ))}
         </Grid>
