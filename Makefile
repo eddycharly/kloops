@@ -112,4 +112,7 @@ gen-docs-commands:
 gen-docs-plugins:
 	go run ./scripts/gen-docs/plugins/main.go > ./docs/plugins/PLUGINS.md
 
-gen-docs: gen-docs-commands gen-docs-plugins
+gen-docs-dashboard:
+	go run ./scripts/gen-docs/dashboard/main.go > ./docs/dev/DASHBOARD-BACKEND.md
+
+gen-docs: gen-docs-commands gen-docs-plugins gen-docs-dashboard

@@ -12,59 +12,139 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const proxyRoute = "/proxy/{rest:.*}"
+type Route struct {
+	Description    string
+	Path           string
+	PathPrefix     string
+	Methods        []string
+	HandlerFactory func() (http.Handler, error)
+}
 
 type Server interface {
 	Start(addr string, port int) error
 }
 
-type server struct {
-	namespace   string
-	config      *rest.Config
-	client      client.Client
-	broadcaster *utils.Broadcaster
-	logger      logr.Logger
+type DashboardServer struct {
+	Routes []Route
+	logger logr.Logger
 }
 
-func NewServer(namespace string, config *rest.Config, client client.Client, broadcaster *utils.Broadcaster, logger logr.Logger) Server {
-	return &server{
-		namespace:   namespace,
-		config:      config,
-		client:      client,
-		broadcaster: broadcaster,
-		logger:      logger.WithName("Server"),
+func NewServer(namespace string, config *rest.Config, client client.Client, broadcaster *utils.Broadcaster, logger logr.Logger) DashboardServer {
+	logger = logger.WithName("Server")
+	// proxy := handlers.NewProxyHandler(config, logger)
+	// static := http.StripPrefix("/", http.FileServer(http.Dir("./dashboard/build")))
+	// repoConfig := handlers.NewReponConfigHandler(namespace, client, logger)
+	// pluginConfig := handlers.NewPluginConfigHandler(namespace, client, logger)
+	// pluginHelp := handlers.NewPluginHelpHandler(logger)
+	var routes = []Route{
+		{
+			Description: "Proxy to the kubernetes api server",
+			Path:        "/proxy/{rest:.*}",
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.Proxy(config, logger)
+			},
+		},
+		{
+			Description: "Get plugins help",
+			Path:        "/api/pluginhelp",
+			Methods:     []string{"GET"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.PluginHelp(logger)
+			},
+		},
+		{
+			Description: "List plugin configs",
+			Path:        "/api/plugins",
+			Methods:     []string{"GET"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.ListPluginConfigs(namespace, client, logger)
+			},
+		},
+		{
+			Description: "Get plugin config",
+			Path:        "/api/plugins/{name}",
+			Methods:     []string{"GET"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.GetPluginConfig(namespace, client, logger)
+			},
+		},
+		{
+			Description: "List repo configs",
+			Path:        "/api/repos",
+			Methods:     []string{"GET"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.ListRepoConfigs(namespace, client, logger)
+			},
+		},
+		{
+			Description: "Get repo config",
+			Path:        "/api/repos/{name}",
+			Methods:     []string{"GET"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.GetRepoConfig(namespace, client, logger)
+			},
+		},
+		{
+			Description: "Create repo config",
+			Path:        "/api/repos/{name}",
+			Methods:     []string{"POST"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.CreateRepoConfig(namespace, client, logger)
+			},
+		},
+		{
+			Description: "Setup repo config hooks",
+			Path:        "/api/hooks/{name}",
+			Methods:     []string{"POST"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.HookRepoConfig(namespace, client, logger)
+			},
+		},
+		{
+			Description: "Connect to websocket",
+			Path:        "/socket",
+			Methods:     []string{"GET"},
+			HandlerFactory: func() (http.Handler, error) {
+				return handlers.WebSocket(broadcaster, logger)
+			},
+		},
+		{
+			Description: "Static content",
+			PathPrefix:  "/",
+			Methods:     []string{"GET"},
+			HandlerFactory: func() (http.Handler, error) {
+				return http.StripPrefix("/", http.FileServer(http.Dir("./dashboard/build"))), nil
+			},
+		},
+	}
+
+	return DashboardServer{
+		Routes: routes,
+		logger: logger,
 	}
 }
 
-func (s *server) Start(addr string, port int) error {
+func (s *DashboardServer) Start(addr string, port int) error {
 	logger := s.logger.WithValues("addr", addr, "port", port)
-	logger.Info("starting server ...")
-	r := mux.NewRouter()
-	// Proxy
-	r.Handle(proxyRoute, handlers.NewProxyHandler(s.config, logger))
-	// Api
-	repoConfig := handlers.NewReponConfigHandler(s.namespace, s.client, s.logger)
-	pluginConfig := handlers.NewPluginConfigHandler(s.namespace, s.client, s.logger)
-	pluginHelp := handlers.NewPluginHelpHandler(s.logger)
-	r.HandleFunc("/api/pluginhelp", pluginHelp.List).Methods("GET")
-	r.HandleFunc("/api/plugins", pluginConfig.List).Methods("GET")
-	r.HandleFunc("/api/plugins/{name}", pluginConfig.Get).Methods("GET")
-	// r.HandleFunc("/api/plugins", pluginConfig.Create).Methods("POST")
-	r.HandleFunc("/api/repos", repoConfig.List).Methods("GET")
-	r.HandleFunc("/api/repos/{name}", repoConfig.Get).Methods("GET")
-	r.HandleFunc("/api/repos", repoConfig.Create).Methods("POST")
-	r.HandleFunc("/api/hooks/{name}", repoConfig.Hook).Methods("POST")
-	// Websocket
-	r.HandleFunc("/resources", func(w http.ResponseWriter, r *http.Request) {
-		connection, err := utils.UpgradeToWebsocket(w, r)
+	logger.Info("setting up server routes ...")
+	router := mux.NewRouter()
+	for _, route := range s.Routes {
+		logger.WithValues("path", route.Path, "pathPrefix", route.PathPrefix, "description", route.Description).Info("setting up server routes ...")
+		var r *mux.Route
+		handler, err := route.HandlerFactory()
 		if err != nil {
-			fmt.Println(err)
-			// log.Error().Err(err).Msg("Could not upgrade to websocket connection")
-			return
+			logger.Error(err, "Error building http transport")
+			return err
 		}
-		utils.WriteOnlyWebsocket(connection, s.broadcaster)
-	})
-	// Static content
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./dashboard/build"))))
-	return http.ListenAndServe(fmt.Sprintf("%s:%d", addr, port), r)
+		if route.PathPrefix != "" {
+			r = router.PathPrefix(route.PathPrefix).Handler(handler)
+		} else {
+			r = router.Handle(route.Path, handler)
+		}
+		if route.Methods != nil {
+			r.Methods(route.Methods...)
+		}
+	}
+	logger.Info("starting server ...")
+	return http.ListenAndServe(fmt.Sprintf("%s:%d", addr, port), router)
 }
