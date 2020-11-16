@@ -19,7 +19,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
       - name: List changed
         id: list
-        uses: helm/chart-testing-action@v1.1.0
+        uses: helm/chart-testing-action@v2.0.1
         with:
           command: list-changed
       - name: Release
