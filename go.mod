@@ -8,7 +8,7 @@ require (
 	github.com/go-logr/zapr v0.2.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/jenkins-x/go-scm v1.5.176
+	github.com/jenkins-x/go-scm v1.5.202
 	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.2
 	github.com/pkg/errors v0.9.1
