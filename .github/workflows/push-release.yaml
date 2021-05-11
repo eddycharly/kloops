@@ -23,7 +23,7 @@ jobs:
         with:
           command: list-changed
       - name: Release
-        uses: helm/chart-releaser-action@v1.0.0
+        uses: helm/chart-releaser-action@v1.2.1
         env:
           CR_TOKEN: "${{ secrets.CR_TOKEN }}"
         # if: steps.list.outputs.changed == 'true'
